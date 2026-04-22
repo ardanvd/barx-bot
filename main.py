@@ -320,7 +320,7 @@ def try_lira_rates() -> Tuple[Optional[float], Optional[float]]:
             eur_try = usd_try / usd_eur
             return float(usd_try), float(eur_try)
     except Exception as e:
-        log.info("exchangerate.host failed: %s", e)
+       
     # fallback: open.er-api.com
     try:
         r = requests.get("https://open.er-api.com/v6/latest/USD", timeout=20)
