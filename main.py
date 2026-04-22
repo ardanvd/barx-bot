@@ -74,15 +74,7 @@ USER_AGENT = (
 
 # -------------------- Logging --------------------
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler(LOG_PATH, encoding="utf-8"),
-        logging.StreamHandler(),
-    ],
-)
-log = logging.getLogger("barx")
+
 
 
 # -------------------- Env / Token --------------------
