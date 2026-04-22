@@ -427,7 +427,7 @@ def render_post(
         f"{preamble}\n"
         f"🇹🇷 بازار ترکیه (TRY):\n"
         f"🇺🇸 دلار: {fmt_decimal(try_usd_lira)} لیر\n"
-        f"🇪🇺 یورو: {fmt_decimal(try_eur_lira)} لیر\n"
+        
         f"\n"
         f"🇮🇷 بازار ایران (تومان):\n"
         f"🇺🇸 دلار آمریکا:\n"
