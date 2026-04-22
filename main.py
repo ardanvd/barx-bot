@@ -40,9 +40,9 @@ from bs4 import BeautifulSoup
 
 # -------------------- Config --------------------
 HOME = Path(".")
-STATE_PATH = HOME / "barx_live_state.json"
-LOG_PATH = HOME / "barx_live_monitor.log"
-ENV_PATH = HOME / ".barx_env"
+STATE_PATH =Path("state.json")
+LOG_PATH =Path("log.txt")
+ENV_PATH =Path(".env")
 
 CHANNEL = "@barxexchange"
 ORDER_CONTACT = "@Arda_ist1"
