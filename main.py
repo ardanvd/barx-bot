@@ -434,9 +434,9 @@ def render_post(
         f"📥 خرید: {fmt_int(usd_buy)}\n"
         f"📤 فروش: {fmt_int(usd_sell)}\n"
         f"\n"
-        f"🇪🇺 یورو:\n"
-        f"📥 خرید: {fmt_int(eur_buy)}\n"
-        f"📤 فروش: {fmt_int(eur_sell)}\n"
+        
+        
+        
         f"\n"
         f"🇹🇷 حواله لیر ترکیه:\n"
         f"📥 خرید: {fmt_int(try_buy)}\n"
