@@ -15,7 +15,7 @@ Policy (enforced):
 - Buy/Sell spread: 1,000 Toman for USD & EUR; 100 Toman for TRY (buy lower).
 - Ordinary duplicate posts blocked: if no change AND silence <= 15 min => skip.
 - last_post_utc persisted in state.
-- Order contact @Arda_ist1; channel @barxexchange.
+- Order contact @barx_exchangee; channel @barxexchange.
 
 Files:
 - /home/ubuntu/barx_live_monitor.py   (this file)
@@ -46,7 +46,7 @@ LOG_PATH = HOME / "barx_live_monitor.log"
 ENV_PATH = HOME / ".barx_env"
 
 CHANNEL = "@barxexchange"
-ORDER_CONTACT = "@Arda_ist1"
+ORDER_CONTACT = "@barx_exchangee"
 
 USD_PRIMARY = "dollar_tehran3bze"   # weight 0.75
 USD_SECONDARY = "tahran_sabza"      # weight 0.25
