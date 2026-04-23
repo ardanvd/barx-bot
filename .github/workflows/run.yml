@@ -2,23 +2,37 @@ name: Barx Bot
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: '*/30 6-21 * * *'
   workflow_dispatch:
 
 jobs:
   run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.11'
 
-      - run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      - run: python main.py
+      - name: Run BARX monitor
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+          TELEGRAM_CHANNEL: "@barxexchange"
+        run: python main.py
+
+      - name: Save state back to repo
+        run: |
+          git config user.name "barx-bot"
+          git config user.email "barx-bot@users.noreply.github.com"
+          git add barx_live_state.json barx_live_monitor.log || true
+          git diff --cached --quiet || git commit -m "state: $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push || true
