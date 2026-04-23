@@ -39,10 +39,11 @@ import requests
 from bs4 import BeautifulSoup
 
 # -------------------- Config --------------------
-HOME = Path(".")
-STATE_PATH =Path("state.json")
-LOG_PATH =Path("log.txt")
-ENV_PATH =Path(".env")
+
+HOME = Path(__file__).parent
+STATE_PATH = HOME / "barx_live_state.json"
+LOG_PATH = HOME / "barx_live_monitor.log"
+ENV_PATH = HOME / ".barx_env"
 
 CHANNEL = "@barxexchange"
 ORDER_CONTACT = "@Arda_ist1"
@@ -55,7 +56,7 @@ USD_WEIGHT_SECONDARY = 0.25
 EUR_PRIMARY = "navasanchannel"
 EUR_BACKUP = "irancurrency"
 
-SILENCE_LIMIT_MIN = 15              # minutes; > 15 min silence + activity => post
+SILENCE_LIMIT_MIN = 30              # minutes; post every 30 min unconditionally
 DEVIATION_GUARD_PCT = 3.0           # % deviation vs Bonbast allowed
 WORKING_HOURS_START = 9             # 09:00 Tehran
 WORKING_HOURS_END = 24              # 00:00 next day (exclusive)
@@ -74,7 +75,15 @@ USER_AGENT = (
 
 # -------------------- Logging --------------------
 
-
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_PATH, encoding="utf-8"),
+        logging.StreamHandler(),
+    ],
+)
+log = logging.getLogger("barx")
 
 
 # -------------------- Env / Token --------------------
@@ -259,16 +268,17 @@ def extract_usd_tomans(posts: List[Dict[str, Any]]) -> Optional[float]:
 
 
 def extract_eur_tomans(posts: List[Dict[str, Any]]) -> Optional[float]:
+    """
+    Final EUR extractor: specifically targets @navasanchannel format.
+    """
     for p in reversed(posts):
         txt = p.get("text", "")
-        if not txt:
-            continue
-        txt_norm = txt.translate(PERSIAN_DIGITS)
-        for m in NUM_RE.finditer(txt_norm):
-            val = _normalize_num(m.group(0))
-            if val is None:
-                continue
-            if 100_000 <= val <= 400_000:
+        if not txt: continue
+        # Navasan often posts: یورو تهران : 182,500
+        m = re.search(r"(?:یورو|EUR)[^\d]*([\d,]{6,8})", txt)
+        if m:
+            val = _normalize_num(m.group(1))
+            if val and 150_000 <= val <= 250_000:
                 return val
     return None
 
@@ -320,7 +330,7 @@ def try_lira_rates() -> Tuple[Optional[float], Optional[float]]:
             eur_try = usd_try / usd_eur
             return float(usd_try), float(eur_try)
     except Exception as e:
-       
+        log.info("exchangerate.host failed: %s", e)
     # fallback: open.er-api.com
     try:
         r = requests.get("https://open.er-api.com/v6/latest/USD", timeout=20)
@@ -373,13 +383,22 @@ def apply_bonbast_guard(weighted: Optional[float], bonbast: Optional[float]) -> 
     return weighted
 
 
-def spread(mid: float, spread_value: int) -> Tuple[int, int]:
-    """Returns (buy, sell) with buy = mid - spread/2, sell = mid + spread/2, rounded."""
-    buy = round_to_nearest(mid - spread_value / 2)
-    sell = round_to_nearest(mid + spread_value / 2)
-    # enforce exact spread
-    if sell - buy != spread_value:
-        sell = buy + spread_value
+def spread(mid: float, spread_value: int, step: int = 50) -> Tuple[int, int]:
+    """
+    Returns (buy, sell) with buy = mid - spread/2, sell = mid + spread/2.
+    """
+    import math
+    if spread_value == 100: # TRY: round mid to nearest 10, then sell = mid_rounded + 10, buy = sell - 100
+        # For mid 3451: round(3451/10)*10 = 3450 => sell=3450+10=3460, buy=3360
+        # For mid 3438: round(3438/10)*10 = 3440 => sell=3440+10=3450, buy=3350
+        mid_rounded = int(round(mid / 10.0) * 10)
+        sell = mid_rounded + 10
+        buy = sell - 100
+        return buy, sell
+        
+    # Default logic for USD/EUR: round to nearest 50
+    buy = int(round((mid - spread_value / 2) / step) * step)
+    sell = buy + spread_value
     return buy, sell
 
 
@@ -419,16 +438,16 @@ def render_post(
         f"{preamble}\n"
         f"🇹🇷 بازار ترکیه (TRY):\n"
         f"🇺🇸 دلار: {fmt_decimal(try_usd_lira)} لیر\n"
-        
+        f"🇪🇺 یورو: {fmt_decimal(try_eur_lira)} لیر\n"
         f"\n"
         f"🇮🇷 بازار ایران (تومان):\n"
         f"🇺🇸 دلار آمریکا:\n"
         f"📥 خرید: {fmt_int(usd_buy)}\n"
         f"📤 فروش: {fmt_int(usd_sell)}\n"
         f"\n"
-        
-        
-        
+        f"🇪🇺 یورو:\n"
+        f"📥 خرید: {fmt_int(eur_buy)}\n"
+        f"📤 فروش: {fmt_int(eur_sell)}\n"
         f"\n"
         f"🇹🇷 حواله لیر ترکیه:\n"
         f"📥 خرید: {fmt_int(try_buy)}\n"
@@ -554,20 +573,29 @@ def run_cycle() -> Dict[str, Any]:
     usd_buy, usd_sell = spread(usd_mid, USD_SPREAD)
     eur_buy, eur_sell = spread(eur_mid, EUR_SPREAD)
 
-    # TRY havale (Toman per Lira): USD_Toman / USD_Lira, then +- spread/2
-    if usd_lira and usd_mid:
-        try_mid = usd_mid / usd_lira
-        try_buy, try_sell = spread(try_mid, TRY_SPREAD)
+    # TRY havale (Toman per Lira): USD_Toman / USD_Lira_Turkey
+    # IMPORTANT: We use the EXACT same usd_lira value that appears in the post header
+    # so the displayed rate and the calculated price are always consistent.
+    # e.g. if post shows "دلار: 44.9091 لیر" then TRY = 155000 / 44.9091 = 3451
+    effective_usd_lira = usd_lira if (usd_lira and 30 <= usd_lira <= 60) else 44.91
+    display_usd_lira = round(effective_usd_lira, 4)  # This is what shows in post header
+    
+    if usd_mid:
+        # Divide by the EXACT displayed rate for full consistency
+        try_mid = usd_mid / display_usd_lira
+        try_buy, try_sell = spread(try_mid, TRY_SPREAD, step=10)
+        log.info("TRY mid calculated: %.2f / %.4f = %.2f -> Buy: %d, Sell: %d", 
+                 usd_mid, display_usd_lira, try_mid, try_buy, try_sell)
     else:
-        # reuse previous if available
         try_buy = last.get("try_buy") or 0
         try_sell = last.get("try_sell") or 0
+        log.warning("TRY mid fallback used")
 
     new_keys = {
         "usd_buy": usd_buy, "usd_sell": usd_sell,
         "eur_buy": eur_buy, "eur_sell": eur_sell,
         "try_buy": try_buy, "try_sell": try_sell,
-        "try_usd_lira": round(usd_lira, 4) if usd_lira else last.get("try_usd_lira"),
+        "try_usd_lira": display_usd_lira,
         "try_eur_lira": round(eur_lira, 4) if eur_lira else last.get("try_eur_lira"),
     }
 
@@ -587,9 +615,10 @@ def run_cycle() -> Dict[str, Any]:
     is_smart_update = False
     if changed:
         decision = "post"
-    elif (mins_silent is None) or (mins_silent > SILENCE_LIMIT_MIN and activity):
+    elif (mins_silent is None) or (mins_silent >= SILENCE_LIMIT_MIN):
+        # Post every 30 minutes unconditionally regardless of price change
         decision = "post"
-        is_smart_update = True  # "market still active" variant
+        is_smart_update = True
     else:
         decision = "skip"
 
