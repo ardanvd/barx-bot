@@ -64,3 +64,6 @@
 2026-04-24 11:33:06,348 [INFO] TRY mid calculated: 155000.00 / 44.9447 = 3448.68 -> Buy: 3360, Sell: 3460
 2026-04-24 11:33:06,348 [INFO] cycle Tehran=15:03 changed=False silent=57.5min activity=True -> post
 2026-04-24 11:33:06,722 [INFO] cycle result: {'action': 'posted', 'detail': 'smart_update'}
+2026-04-24 12:03:30,949 [INFO] TRY mid calculated: 155000.00 / 44.9447 = 3448.68 -> Buy: 3360, Sell: 3460
+2026-04-24 12:03:30,949 [INFO] cycle Tehran=15:33 changed=False silent=30.4min activity=True -> post
+2026-04-24 12:03:31,559 [INFO] cycle result: {'action': 'posted', 'detail': 'smart_update'}
