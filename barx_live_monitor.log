@@ -22,3 +22,6 @@
 2026-04-24 04:33:21,982 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
 2026-04-24 05:06:20,356 [INFO] outside working hours (Tehran 08:36); sleeping
 2026-04-24 05:06:20,356 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
+2026-04-24 05:33:52,541 [INFO] TRY mid calculated: 155000.00 / 44.9447 = 3448.68 -> Buy: 3360, Sell: 3460
+2026-04-24 05:33:52,542 [INFO] cycle Tehran=09:03 changed=False silent=633.6min activity=True -> post
+2026-04-24 05:33:53,119 [INFO] cycle result: {'action': 'posted', 'detail': 'smart_update'}
