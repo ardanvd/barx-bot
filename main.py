@@ -6,14 +6,13 @@ BARX Live Monitor
 Policy (enforced):
 - Working hours: 09:00 -> 00:00 Tehran time (Asia/Tehran). Outside hours => idle.
 - At 00:00 (once per day), publish the "end of trading" message.
-- USD: weighted avg of @dollar_tehran3bze (75%) + @tahran_sabza (25%).
-  Bonbast is only a deviation guard / fallback.
-- EUR: primary @navasanchannel, fallback @irancurrency.
+- USD: primary @pi_jt (Tehran forward price), fallback @dollar_tehran3bze (75%) + @tahran_sabza (25%).
+- EUR: primary @pi_jt (Tehran forward price), fallback @navasanchannel, fallback @irancurrency.
 - TRY lira rate: fetched from a public FX endpoint (TRY/USD -> derive).
-- Smart posting: publish if any tracked key changes OR silence > 15 min AND
-  source channels show fresh activity (newer post clock).
+- Smart posting: publish if any tracked key changes OR silence >= SILENCE_LIMIT_MIN.
 - Buy/Sell spread: 1,000 Toman for USD & EUR; 100 Toman for TRY (buy lower).
-- Ordinary duplicate posts blocked: if no change AND silence <= 15 min => skip.
+- STRICT duplicate guard: if prices unchanged AND silence < SILENCE_LIMIT_MIN => SKIP (no repeat posts).
+- If no fresh price available from any source => SKIP (never post stale/fallback prices).
 - last_post_utc persisted in state.
 - Order contact @barx_exchangee; channel @barxexchange.
 
@@ -21,7 +20,6 @@ Files:
 - /home/ubuntu/barx_live_monitor.py   (this file)
 - /home/ubuntu/barx_live_state.json   (state)
 - /home/ubuntu/barx_live_monitor.log  (log)
-- /home/ubuntu/barx_memory.md         (human memory)
 - /home/ubuntu/.barx_env              (contains TELEGRAM_BOT_TOKEN=...)
 """
 
@@ -48,16 +46,20 @@ ENV_PATH = HOME / ".barx_env"
 CHANNEL = "@barxexchange"
 ORDER_CONTACT = "@barx_exchangee"
 
-USD_PRIMARY = "dollar_tehran3bze"   # weight 0.75
-USD_SECONDARY = "tahran_sabza"      # weight 0.25
-USD_WEIGHT_PRIMARY = 0.75
-USD_WEIGHT_SECONDARY = 0.25
+# Primary source: pi_jt (Tehran forward dollar & euro)
+USD_EUR_PRIMARY = "pi_jt"
 
-EUR_PRIMARY = "navasanchannel"
-EUR_BACKUP = "irancurrency"
+# Fallback USD sources
+USD_FALLBACK_A = "dollar_tehran3bze"   # weight 0.75
+USD_FALLBACK_B = "tahran_sabza"        # weight 0.25
+USD_WEIGHT_A = 0.75
+USD_WEIGHT_B = 0.25
 
-SILENCE_LIMIT_MIN = 30              # minutes; post every 30 min unconditionally
-DEVIATION_GUARD_PCT = 3.0           # % deviation vs Bonbast allowed
+# Fallback EUR sources
+EUR_FALLBACK_A = "navasanchannel"
+EUR_FALLBACK_B = "irancurrency"
+
+SILENCE_LIMIT_MIN = 30              # minutes; post every 30 min if price changed
 WORKING_HOURS_START = 9             # 09:00 Tehran
 WORKING_HOURS_END = 24              # 00:00 next day (exclusive)
 
@@ -66,7 +68,7 @@ USD_SPREAD = 1000
 EUR_SPREAD = 1000
 TRY_SPREAD = 100
 
-TEHRAN_TZ = dt.timezone(dt.timedelta(hours=3, minutes=30))  # Asia/Tehran (no DST in IR since 2022)
+TEHRAN_TZ = dt.timezone(dt.timedelta(hours=3, minutes=30))
 
 USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
@@ -97,7 +99,6 @@ def load_env() -> Dict[str, str]:
                 continue
             k, v = line.split("=", 1)
             env[k.strip()] = v.strip().strip('"').strip("'")
-    # fall back to process env
     for k in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHANNEL"):
         if k not in env and os.environ.get(k):
             env[k] = os.environ[k]
@@ -112,20 +113,21 @@ CHANNEL_ID = ENV.get("TELEGRAM_CHANNEL", CHANNEL)
 # -------------------- State --------------------
 
 DEFAULT_STATE: Dict[str, Any] = {
-    "last_post_utc": None,             # ISO string
-    "last_keys": {                     # last published tracked values
+    "last_post_utc": None,
+    "last_keys": {
         "usd_buy": None, "usd_sell": None,
         "eur_buy": None, "eur_sell": None,
         "try_buy": None, "try_sell": None,
         "try_usd_lira": None, "try_eur_lira": None,
     },
-    "last_source_clocks": {            # last seen source-channel post clocks
-        USD_PRIMARY: None,
-        USD_SECONDARY: None,
-        EUR_PRIMARY: None,
-        EUR_BACKUP: None,
+    "last_source_clocks": {
+        USD_EUR_PRIMARY: None,
+        USD_FALLBACK_A: None,
+        USD_FALLBACK_B: None,
+        EUR_FALLBACK_A: None,
+        EUR_FALLBACK_B: None,
     },
-    "end_of_trading_date": None,       # YYYY-MM-DD of last EOT message
+    "end_of_trading_date": None,
     "last_cycle_utc": None,
 }
 
@@ -134,7 +136,6 @@ def load_state() -> Dict[str, Any]:
     if STATE_PATH.exists():
         try:
             data = json.loads(STATE_PATH.read_text(encoding="utf-8"))
-            # merge with defaults so new keys don't break older states
             merged = json.loads(json.dumps(DEFAULT_STATE))
             for k, v in data.items():
                 merged[k] = v
@@ -161,10 +162,6 @@ def now_tehran() -> dt.datetime:
 
 
 def is_within_working_hours(t_tehran: dt.datetime) -> bool:
-    """
-    Working window: 09:00:00 <= t < 24:00:00 (Tehran). 00:00 exact is handled
-    separately as end-of-trading trigger.
-    """
     h = t_tehran.hour
     return WORKING_HOURS_START <= h < WORKING_HOURS_END
 
@@ -203,18 +200,16 @@ def tg_send_message(text: str, chat: str = CHANNEL_ID) -> Dict[str, Any]:
 
 # -------------------- Source channel scraping --------------------
 
-MSG_BLOCK_RE = re.compile(r"tgme_widget_message_wrap")
-
-NUM_RE = re.compile(r"[\d,\.]+")
 PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٫٬", "0123456789..")
+NUM_RE = re.compile(r"[\d,]+")
 
 
-def _normalize_num(s: str) -> Optional[float]:
+def _normalize_int(s: str) -> Optional[int]:
     if s is None:
         return None
     s = s.translate(PERSIAN_DIGITS).replace(",", "").strip()
     try:
-        return float(s)
+        return int(float(s))
     except Exception:
         return None
 
@@ -231,7 +226,7 @@ def fetch_channel_page(username: str) -> Optional[str]:
     return None
 
 
-def parse_latest_posts(html_text: str, limit: int = 8) -> List[Dict[str, Any]]:
+def parse_latest_posts(html_text: str, limit: int = 12) -> List[Dict[str, Any]]:
     soup = BeautifulSoup(html_text, "html.parser")
     msgs = soup.select(".tgme_widget_message_wrap")
     out: List[Dict[str, Any]] = []
@@ -244,43 +239,6 @@ def parse_latest_posts(html_text: str, limit: int = 8) -> List[Dict[str, Any]]:
             ts = time_el["datetime"]
         out.append({"text": body, "datetime": ts})
     return out
-
-
-def extract_usd_tomans(posts: List[Dict[str, Any]]) -> Optional[float]:
-    """
-    Best-effort extractor: scans latest posts for a number in Tomans range
-    (typical IRR/USD 2024-2026: 80k..250k Toman). Returns the most recent
-    plausible value found.
-    """
-    for p in reversed(posts):  # newest first (list order is oldest->newest)
-        txt = p.get("text", "")
-        if not txt:
-            continue
-        txt_norm = txt.translate(PERSIAN_DIGITS)
-        # strip any Persian "/" inside numbers (decimal sep)
-        for m in NUM_RE.finditer(txt_norm):
-            val = _normalize_num(m.group(0))
-            if val is None:
-                continue
-            if 80_000 <= val <= 300_000:
-                return val
-    return None
-
-
-def extract_eur_tomans(posts: List[Dict[str, Any]]) -> Optional[float]:
-    """
-    Final EUR extractor: specifically targets @navasanchannel format.
-    """
-    for p in reversed(posts):
-        txt = p.get("text", "")
-        if not txt: continue
-        # Navasan often posts: یورو تهران : 182,500
-        m = re.search(r"(?:یورو|EUR)[^\d]*([\d,]{6,8})", txt)
-        if m:
-            val = _normalize_num(m.group(1))
-            if val and 150_000 <= val <= 250_000:
-                return val
-    return None
 
 
 def latest_post_clock(posts: List[Dict[str, Any]]) -> Optional[str]:
@@ -297,16 +255,118 @@ def get_source_snapshot(username: str) -> Dict[str, Any]:
     return {"ok": True, "posts": posts, "clock": latest_post_clock(posts)}
 
 
-# -------------------- Bonbast guard --------------------
+# -------------------- pi_jt extractors (PRIMARY) --------------------
 
-def bonbast_usd_toman() -> Optional[float]:
+def extract_pi_jt_usd(posts: List[Dict[str, Any]]) -> Tuple[Optional[int], Optional[int]]:
     """
-    Bonbast scraping is unreliable (page returns numbers that are often sub-rates
-    like coin prices, not USD). Guard is disabled until a robust JSON endpoint
-    is wired in. We keep the function but return None so the weighted average
-    from source channels is used directly. The deviation-guard logic still
-    functions the moment this returns a valid number.
+    Extract Tehran forward USD buy/sell from @pi_jt.
+    Format: دلار تـهران فردایی 💸 : 154,000 خریـدار 🔴 154,500 فروشنده
+    Returns (buy, sell) or (None, None).
     """
+    for p in reversed(posts):
+        txt = p.get("text", "")
+        if not txt:
+            continue
+        # Must mention Tehran dollar (not Herat)
+        if ("دلار تـهران" in txt or "دلار تهران" in txt) and ("هرات" not in txt):
+            txt_norm = txt.translate(PERSIAN_DIGITS)
+            nums = []
+            for m in NUM_RE.finditer(txt_norm):
+                raw = m.group(0).replace(",", "")
+                if raw.isdigit() and len(raw) >= 5:
+                    val = int(raw)
+                    if 100_000 <= val <= 300_000:
+                        nums.append(val)
+            if len(nums) >= 2:
+                log.info("pi_jt USD extracted: buy=%d sell=%d from: %s", nums[0], nums[1], txt[:80])
+                return nums[0], nums[1]
+            elif len(nums) == 1:
+                # Only one number found; derive sell with spread
+                buy = nums[0]
+                sell = buy + USD_SPREAD
+                log.info("pi_jt USD extracted (1 num): buy=%d sell=%d", buy, sell)
+                return buy, sell
+    return None, None
+
+
+def extract_pi_jt_eur(posts: List[Dict[str, Any]]) -> Tuple[Optional[int], Optional[int]]:
+    """
+    Extract Tehran forward EUR buy/sell from @pi_jt.
+    Format: یورو تـهران فردایی 💸 : 181,000 خریـدار 🔴 181,500 فروشنده
+    Returns (buy, sell) or (None, None).
+    """
+    for p in reversed(posts):
+        txt = p.get("text", "")
+        if not txt:
+            continue
+        if ("یورو" in txt) and ("تهران" in txt or "تـهران" in txt):
+            txt_norm = txt.translate(PERSIAN_DIGITS)
+            nums = []
+            for m in NUM_RE.finditer(txt_norm):
+                raw = m.group(0).replace(",", "")
+                if raw.isdigit() and len(raw) >= 5:
+                    val = int(raw)
+                    if 150_000 <= val <= 300_000:
+                        nums.append(val)
+            if len(nums) >= 2:
+                log.info("pi_jt EUR extracted: buy=%d sell=%d from: %s", nums[0], nums[1], txt[:80])
+                return nums[0], nums[1]
+            elif len(nums) == 1:
+                buy = nums[0]
+                sell = buy + EUR_SPREAD
+                log.info("pi_jt EUR extracted (1 num): buy=%d sell=%d", buy, sell)
+                return buy, sell
+    return None, None
+
+
+# -------------------- Fallback USD extractor --------------------
+
+def extract_usd_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
+    """
+    Fallback USD extractor for @dollar_tehran3bze / @tahran_sabza.
+    Only extracts if the post explicitly contains دلار (dollar keyword).
+    Range: 100k..300k Toman.
+    """
+    for p in reversed(posts):
+        txt = p.get("text", "")
+        if not txt:
+            continue
+        # Must explicitly mention dollar
+        if "دلار" not in txt and "dollar" not in txt.lower():
+            continue
+        txt_norm = txt.translate(PERSIAN_DIGITS)
+        for m in NUM_RE.finditer(txt_norm):
+            raw = m.group(0).replace(",", "")
+            if raw.isdigit() and len(raw) >= 5:
+                val = int(raw)
+                if 100_000 <= val <= 300_000:
+                    return float(val)
+    return None
+
+
+# -------------------- Fallback EUR extractor --------------------
+
+def extract_eur_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
+    """
+    Fallback EUR extractor for @navasanchannel / @irancurrency.
+    Specifically looks for یورو keyword with Tehran context.
+    """
+    for p in reversed(posts):
+        txt = p.get("text", "")
+        if not txt:
+            continue
+        if "یورو" not in txt and "EUR" not in txt:
+            continue
+        # Must not be a crypto/digital currency post
+        if "دیجیتال" in txt or "کریپتو" in txt or "بیت" in txt:
+            continue
+        m = re.search(r"(?:یورو|EUR)[^\d]*([\d,]{6,8})", txt)
+        if m:
+            val_str = m.group(1).replace(",", "")
+            if val_str.isdigit():
+                val = int(val_str)
+                if 150_000 <= val <= 300_000:
+                    return float(val)
     return None
 
 
@@ -314,7 +374,7 @@ def bonbast_usd_toman() -> Optional[float]:
 
 def try_lira_rates() -> Tuple[Optional[float], Optional[float]]:
     """
-    Returns (USD_in_Lira, EUR_in_Lira) using exchangerate.host (free, no key).
+    Returns (USD_in_Lira, EUR_in_Lira).
     """
     try:
         r = requests.get(
@@ -331,7 +391,6 @@ def try_lira_rates() -> Tuple[Optional[float], Optional[float]]:
             return float(usd_try), float(eur_try)
     except Exception as e:
         log.info("exchangerate.host failed: %s", e)
-    # fallback: open.er-api.com
     try:
         r = requests.get("https://open.er-api.com/v6/latest/USD", timeout=20)
         j = r.json()
@@ -348,55 +407,12 @@ def try_lira_rates() -> Tuple[Optional[float], Optional[float]]:
 
 # -------------------- Price computation --------------------
 
-def round_to_nearest(value: float, step: int = 50) -> int:
-    return int(round(value / step) * step)
-
-
-def compute_usd_mid(sources: Dict[str, Optional[float]]) -> Optional[float]:
-    p = sources.get(USD_PRIMARY)
-    s = sources.get(USD_SECONDARY)
-    if p and s:
-        return USD_WEIGHT_PRIMARY * p + USD_WEIGHT_SECONDARY * s
-    if p:
-        return p
-    if s:
-        return s
-    return None
-
-
-def apply_bonbast_guard(weighted: Optional[float], bonbast: Optional[float]) -> Optional[float]:
-    if weighted is None:
-        return bonbast
-    if bonbast is None:
-        return weighted
-    # Only trust bonbast when it is within a sane IRR/USD range (50k..300k Toman)
-    if not (50_000 <= bonbast <= 300_000):
-        return weighted
-    deviation = abs(weighted - bonbast) / bonbast * 100.0
-    if deviation > DEVIATION_GUARD_PCT:
-        log.warning(
-            "deviation guard: weighted=%.0f bonbast=%.0f diff=%.2f%% > %.2f%% — using weighted (guard informational)",
-            weighted, bonbast, deviation, DEVIATION_GUARD_PCT,
-        )
-        # keep the weighted value; guard is informational, not a hard override
-        return weighted
-    return weighted
-
-
 def spread(mid: float, spread_value: int, step: int = 50) -> Tuple[int, int]:
-    """
-    Returns (buy, sell) with buy = mid - spread/2, sell = mid + spread/2.
-    """
-    import math
-    if spread_value == 100: # TRY: round mid to nearest 10, then sell = mid_rounded + 10, buy = sell - 100
-        # For mid 3451: round(3451/10)*10 = 3450 => sell=3450+10=3460, buy=3360
-        # For mid 3438: round(3438/10)*10 = 3440 => sell=3440+10=3450, buy=3350
+    if spread_value == 100:
         mid_rounded = int(round(mid / 10.0) * 10)
         sell = mid_rounded + 10
         buy = sell - 100
         return buy, sell
-        
-    # Default logic for USD/EUR: round to nearest 50
     buy = int(round((mid - spread_value / 2) / step) * step)
     sell = buy + spread_value
     return buy, sell
@@ -421,21 +437,10 @@ def render_post(
     eur_buy: int, eur_sell: int,
     try_buy: int, try_sell: int,
     try_usd_lira: Optional[float], try_eur_lira: Optional[float],
-    is_smart_silence_update: bool,
 ) -> str:
-    header = (
-        "⏱ Barx Exchange - آپدیت هوشمند بازار"
-        if is_smart_silence_update
-        else "🚀 Barx Exchange - نرخ لحظه‌ای ارز"
-    )
-    preamble = (
-        "\n\nنرخ‌های اصلی نسبت به پست قبلی ثابت مانده‌اند، اما بازار همچنان فعال است.\n"
-        if is_smart_silence_update
-        else "\n"
-    )
     msg = (
-        f"{header}"
-        f"{preamble}\n"
+        f"🚀 Barx Exchange - نرخ لحظه‌ای ارز\n"
+        f"\n"
         f"🇹🇷 بازار ترکیه (TRY):\n"
         f"🇺🇸 دلار: {fmt_decimal(try_usd_lira)} لیر\n"
         f"🇪🇺 یورو: {fmt_decimal(try_eur_lira)} لیر\n"
@@ -484,15 +489,6 @@ def keys_changed(prev: Dict[str, Any], new: Dict[str, Any]) -> bool:
     return False
 
 
-def sources_show_fresh_activity(
-    prev_clocks: Dict[str, Optional[str]], new_clocks: Dict[str, Optional[str]]
-) -> bool:
-    for k, v in new_clocks.items():
-        if v and prev_clocks.get(k) != v:
-            return True
-    return False
-
-
 # -------------------- Main cycle --------------------
 
 def run_cycle() -> Dict[str, Any]:
@@ -506,7 +502,6 @@ def run_cycle() -> Dict[str, Any]:
     today_tehran = t_tehran.strftime("%Y-%m-%d")
 
     # -------- End-of-trading at 00:00 Tehran --------
-    # Trigger window: first 5 minutes after 00:00 each day, once per date.
     if t_tehran.hour == 0 and t_tehran.minute < 5:
         if state.get("end_of_trading_date") != today_tehran:
             log.info("Sending end-of-trading message for %s", today_tehran)
@@ -525,119 +520,139 @@ def run_cycle() -> Dict[str, Any]:
 
     # -------- Working-hours gate --------
     if not is_within_working_hours(t_tehran):
-        log.info(
-            "outside working hours (Tehran %s); sleeping",
-            t_tehran.strftime("%H:%M"),
-        )
+        log.info("outside working hours (Tehran %s); sleeping", t_tehran.strftime("%H:%M"))
         save_state(state)
         result.update({"action": "idle", "detail": "outside_working_hours"})
         return result
 
-    # -------- Gather USD --------
-    usd_p_snap = get_source_snapshot(USD_PRIMARY)
-    usd_s_snap = get_source_snapshot(USD_SECONDARY)
-    usd_p_val = extract_usd_tomans(usd_p_snap["posts"]) if usd_p_snap["ok"] else None
-    usd_s_val = extract_usd_tomans(usd_s_snap["posts"]) if usd_s_snap["ok"] else None
-    bonb = bonbast_usd_toman()
-    usd_mid_raw = compute_usd_mid({USD_PRIMARY: usd_p_val, USD_SECONDARY: usd_s_val})
-    usd_mid = apply_bonbast_guard(usd_mid_raw, bonb)
+    # -------- Gather prices from PRIMARY source: pi_jt --------
+    pi_snap = get_source_snapshot(USD_EUR_PRIMARY)
+    usd_buy_raw: Optional[int] = None
+    usd_sell_raw: Optional[int] = None
+    eur_buy_raw: Optional[int] = None
+    eur_sell_raw: Optional[int] = None
+    usd_source = "none"
+    eur_source = "none"
 
-    # -------- Gather EUR --------
-    eur_p_snap = get_source_snapshot(EUR_PRIMARY)
-    eur_mid = extract_eur_tomans(eur_p_snap["posts"]) if eur_p_snap["ok"] else None
-    eur_b_snap = {"ok": False, "posts": [], "clock": None}
-    if eur_mid is None:
-        eur_b_snap = get_source_snapshot(EUR_BACKUP)
-        if eur_b_snap["ok"]:
-            eur_mid = extract_eur_tomans(eur_b_snap["posts"])
+    if pi_snap["ok"]:
+        usd_buy_raw, usd_sell_raw = extract_pi_jt_usd(pi_snap["posts"])
+        eur_buy_raw, eur_sell_raw = extract_pi_jt_eur(pi_snap["posts"])
+        if usd_buy_raw:
+            usd_source = USD_EUR_PRIMARY
+        if eur_buy_raw:
+            eur_source = USD_EUR_PRIMARY
+
+    # -------- Fallback USD if pi_jt didn't yield --------
+    usd_fallback_a_snap = {"ok": False, "posts": [], "clock": None}
+    usd_fallback_b_snap = {"ok": False, "posts": [], "clock": None}
+    if usd_buy_raw is None:
+        log.info("pi_jt USD not found, trying fallback sources")
+        usd_fallback_a_snap = get_source_snapshot(USD_FALLBACK_A)
+        usd_fallback_b_snap = get_source_snapshot(USD_FALLBACK_B)
+        usd_a = extract_usd_tomans_fallback(usd_fallback_a_snap["posts"]) if usd_fallback_a_snap["ok"] else None
+        usd_b = extract_usd_tomans_fallback(usd_fallback_b_snap["posts"]) if usd_fallback_b_snap["ok"] else None
+        if usd_a and usd_b:
+            usd_mid = USD_WEIGHT_A * usd_a + USD_WEIGHT_B * usd_b
+        elif usd_a:
+            usd_mid = usd_a
+        elif usd_b:
+            usd_mid = usd_b
+        else:
+            usd_mid = None
+
+        if usd_mid:
+            usd_buy_raw, usd_sell_raw = spread(usd_mid, USD_SPREAD)
+            usd_source = f"{USD_FALLBACK_A}+{USD_FALLBACK_B}"
+            log.info("USD fallback computed: mid=%.0f buy=%d sell=%d", usd_mid, usd_buy_raw, usd_sell_raw)
+
+    # -------- Fallback EUR if pi_jt didn't yield --------
+    eur_fallback_a_snap = {"ok": False, "posts": [], "clock": None}
+    eur_fallback_b_snap = {"ok": False, "posts": [], "clock": None}
+    if eur_buy_raw is None:
+        log.info("pi_jt EUR not found, trying fallback sources")
+        eur_fallback_a_snap = get_source_snapshot(EUR_FALLBACK_A)
+        eur_mid = extract_eur_tomans_fallback(eur_fallback_a_snap["posts"]) if eur_fallback_a_snap["ok"] else None
+        if eur_mid is None:
+            eur_fallback_b_snap = get_source_snapshot(EUR_FALLBACK_B)
+            eur_mid = extract_eur_tomans_fallback(eur_fallback_b_snap["posts"]) if eur_fallback_b_snap["ok"] else None
+        if eur_mid:
+            eur_buy_raw, eur_sell_raw = spread(eur_mid, EUR_SPREAD)
+            eur_source = EUR_FALLBACK_A if eur_fallback_a_snap["ok"] else EUR_FALLBACK_B
+            log.info("EUR fallback computed: mid=%.0f buy=%d sell=%d", eur_mid, eur_buy_raw, eur_sell_raw)
+
+    # -------- STRICT: if no fresh price from any source => SKIP --------
+    if usd_buy_raw is None or eur_buy_raw is None:
+        log.warning(
+            "No fresh price available: usd_source=%s eur_source=%s — SKIPPING to avoid stale post",
+            usd_source, eur_source
+        )
+        save_state(state)
+        result.update({"action": "skip", "detail": "no_fresh_data"})
+        return result
+
+    log.info("Prices fetched: USD buy=%d sell=%d (src=%s) | EUR buy=%d sell=%d (src=%s)",
+             usd_buy_raw, usd_sell_raw, usd_source, eur_buy_raw, eur_sell_raw, eur_source)
 
     # -------- TRY (lira) --------
     usd_lira, eur_lira = try_lira_rates()
-
-    # -------- Fallbacks from last state if scraping missed --------
     last = state.get("last_keys", {})
-    if usd_mid is None and last.get("usd_buy") and last.get("usd_sell"):
-        usd_mid = (last["usd_buy"] + last["usd_sell"]) / 2.0
-        log.info("USD fallback to previous state mid=%.0f", usd_mid)
-    if eur_mid is None and last.get("eur_buy") and last.get("eur_sell"):
-        eur_mid = (last["eur_buy"] + last["eur_sell"]) / 2.0
-        log.info("EUR fallback to previous state mid=%.0f", eur_mid)
 
-    if usd_mid is None or eur_mid is None:
-        log.error("insufficient data: usd_mid=%s eur_mid=%s", usd_mid, eur_mid)
-        save_state(state)
-        result.update({"action": "skip", "detail": "no_data"})
-        return result
-
-    # -------- Compute buy/sell with spreads --------
-    usd_buy, usd_sell = spread(usd_mid, USD_SPREAD)
-    eur_buy, eur_sell = spread(eur_mid, EUR_SPREAD)
-
-    # TRY havale (Toman per Lira): USD_Toman / USD_Lira_Turkey
-    # IMPORTANT: We use the EXACT same usd_lira value that appears in the post header
-    # so the displayed rate and the calculated price are always consistent.
-    # e.g. if post shows "دلار: 44.9091 لیر" then TRY = 155000 / 44.9091 = 3451
     effective_usd_lira = usd_lira if (usd_lira and 30 <= usd_lira <= 60) else 44.91
-    display_usd_lira = round(effective_usd_lira, 4)  # This is what shows in post header
-    
-    if usd_mid:
-        # Divide by the EXACT displayed rate for full consistency
-        try_mid = usd_mid / display_usd_lira
-        try_buy, try_sell = spread(try_mid, TRY_SPREAD, step=10)
-        log.info("TRY mid calculated: %.2f / %.4f = %.2f -> Buy: %d, Sell: %d", 
-                 usd_mid, display_usd_lira, try_mid, try_buy, try_sell)
-    else:
-        try_buy = last.get("try_buy") or 0
-        try_sell = last.get("try_sell") or 0
-        log.warning("TRY mid fallback used")
+    display_usd_lira = round(effective_usd_lira, 4)
+
+    usd_mid_for_try = (usd_buy_raw + usd_sell_raw) / 2.0
+    try_mid = usd_mid_for_try / display_usd_lira
+    try_buy, try_sell = spread(try_mid, TRY_SPREAD, step=10)
+    log.info("TRY mid calculated: %.2f / %.4f = %.2f -> Buy: %d, Sell: %d",
+             usd_mid_for_try, display_usd_lira, try_mid, try_buy, try_sell)
 
     new_keys = {
-        "usd_buy": usd_buy, "usd_sell": usd_sell,
-        "eur_buy": eur_buy, "eur_sell": eur_sell,
+        "usd_buy": usd_buy_raw, "usd_sell": usd_sell_raw,
+        "eur_buy": eur_buy_raw, "eur_sell": eur_sell_raw,
         "try_buy": try_buy, "try_sell": try_sell,
         "try_usd_lira": display_usd_lira,
         "try_eur_lira": round(eur_lira, 4) if eur_lira else last.get("try_eur_lira"),
     }
 
     new_source_clocks = {
-        USD_PRIMARY: usd_p_snap.get("clock"),
-        USD_SECONDARY: usd_s_snap.get("clock"),
-        EUR_PRIMARY: eur_p_snap.get("clock"),
-        EUR_BACKUP: eur_b_snap.get("clock"),
+        USD_EUR_PRIMARY: pi_snap.get("clock"),
+        USD_FALLBACK_A: usd_fallback_a_snap.get("clock"),
+        USD_FALLBACK_B: usd_fallback_b_snap.get("clock"),
+        EUR_FALLBACK_A: eur_fallback_a_snap.get("clock"),
+        EUR_FALLBACK_B: eur_fallback_b_snap.get("clock"),
     }
 
-    prev_clocks = state.get("last_source_clocks", {})
     changed = keys_changed(last, new_keys)
     mins_silent = minutes_since(state.get("last_post_utc"))
-    activity = sources_show_fresh_activity(prev_clocks, new_source_clocks)
 
-    decision = "skip"
-    is_smart_update = False
+    # -------- STRICT duplicate guard --------
+    # Post ONLY if: price changed, OR silence >= SILENCE_LIMIT_MIN
+    # NEVER post if price is same AND silence < SILENCE_LIMIT_MIN
     if changed:
         decision = "post"
-    elif (mins_silent is None) or (mins_silent >= SILENCE_LIMIT_MIN):
-        # Post every 30 minutes unconditionally regardless of price change
+        reason = "change"
+    elif mins_silent is None or mins_silent >= SILENCE_LIMIT_MIN:
         decision = "post"
-        is_smart_update = True
+        reason = "silence_limit"
     else:
         decision = "skip"
+        reason = "no_change_within_silence_window"
 
     log.info(
-        "cycle Tehran=%s changed=%s silent=%s activity=%s -> %s",
+        "cycle Tehran=%s changed=%s silent=%s -> %s (%s)",
         t_tehran.strftime("%H:%M"),
         changed,
         f"{mins_silent:.1f}min" if mins_silent is not None else "never",
-        activity,
         decision,
+        reason,
     )
 
     if decision == "post":
         msg = render_post(
-            usd_buy, usd_sell,
-            eur_buy, eur_sell,
+            usd_buy_raw, usd_sell_raw,
+            eur_buy_raw, eur_sell_raw,
             try_buy, try_sell,
             new_keys["try_usd_lira"], new_keys["try_eur_lira"],
-            is_smart_silence_update=is_smart_update,
         )
         resp = tg_send_message(msg)
         if resp.get("ok"):
@@ -645,16 +660,15 @@ def run_cycle() -> Dict[str, Any]:
             state["last_source_clocks"] = new_source_clocks
             state["last_post_utc"] = t_utc.isoformat()
             save_state(state)
-            result.update({"action": "posted", "detail": "smart_update" if is_smart_update else "change"})
+            result.update({"action": "posted", "detail": reason})
         else:
             log.error("tg send failed: %s", resp)
             save_state(state)
             result.update({"action": "error", "detail": f"send failed: {resp}"})
     else:
-        # still refresh source clocks so next silence check is accurate
         state["last_source_clocks"] = new_source_clocks
         save_state(state)
-        result.update({"action": "skip", "detail": "no_change_within_silence_window"})
+        result.update({"action": "skip", "detail": reason})
 
     return result
 
