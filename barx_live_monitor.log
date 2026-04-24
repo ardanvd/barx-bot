@@ -183,3 +183,17 @@
 2026-04-24 14:33:45,356 [INFO] TRY mid calculated: 155000.00 / 44.9447 = 3448.68 -> Buy: 3360, Sell: 3460
 2026-04-24 14:33:45,356 [INFO] cycle Tehran=18:03 changed=True silent=58.5min -> post (change)
 2026-04-24 14:33:45,937 [INFO] cycle result: {'action': 'posted', 'detail': 'change'}
+2026-04-24 14:59:28,499 [INFO] pi_jt USD extracted (1 num): buy=154500 sell=155500
+2026-04-24 14:59:28,500 [INFO] pi_jt EUR extracted: buy=181000 sell=181500 from: یورو تـهران فردایی
+💸
+:
+🔵
+181,000
+خریـــدار
+🔴
+181,500
+فروشنده
+2026-04-24 14:59:28,500 [INFO] Prices fetched: USD buy=154500 sell=155500 (src=pi_jt) | EUR buy=181000 sell=181500 (src=pi_jt)
+2026-04-24 14:59:28,879 [INFO] TRY mid calculated: 155000.00 / 44.9447 = 3448.68 -> Buy: 3360, Sell: 3460
+2026-04-24 14:59:28,879 [INFO] cycle Tehran=18:29 changed=False silent=25.7min -> skip (no_change_within_silence_window)
+2026-04-24 14:59:28,879 [INFO] cycle result: {'action': 'skip', 'detail': 'no_change_within_silence_window'}
