@@ -399,8 +399,10 @@ def extract_usd_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
 def extract_eur_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
     """
     Fallback EUR extractor for @navasanchannel / @irancurrency.
-    Handles both single-number posts and combined buy/sell posts.
-    Returns the sell price (mid reference) so the caller can apply spread.
+    Extracts the EUR sell price from posts that contain both USD and EUR prices.
+    The posts typically list USD first then EUR, so we must find the number
+    that comes AFTER the یورو keyword, not the first number in the post.
+    Returns the sell price so the caller can apply spread.
     """
     for p in reversed(posts):
         txt = p.get("text", "")
@@ -412,21 +414,25 @@ def extract_eur_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
         if "دیجیتال" in txt or "کریپتو" in txt or "بیت" in txt:
             continue
         txt_norm = txt.translate(PERSIAN_DIGITS)
-        # Try to find EUR sell price explicitly (فروش after یورو)
-        sell_match = re.search(r"یورو[^\d\n]{0,30}فروش[^\d]*(\d[\d,]{5,7})", txt_norm)
-        if sell_match:
-            val_str = sell_match.group(1).replace(",", "")
-            if val_str.isdigit():
-                val = int(val_str)
-                if 150_000 <= val <= 350_000:
-                    return float(val)
-        # Fallback: first EUR-range number in post
-        for m in NUM_RE.finditer(txt_norm):
-            raw = m.group(0).replace(",", "")
-            if raw.isdigit() and len(raw) >= 6:
-                val = int(raw)
-                if 150_000 <= val <= 350_000:
-                    return float(val)
+        # Strategy 1: explicit "یورو فروش : NUMBER" pattern (navasanchannel)
+        m1 = re.search(r"یورو\s*فروش\s*[:\-]?\s*([\d,]{6,9})", txt_norm)
+        if m1:
+            val = int(m1.group(1).replace(",", ""))
+            if 150_000 <= val <= 350_000:
+                log.info("EUR fallback (sell pattern): %d from %s", val, txt[:60])
+                return float(val)
+        # Strategy 2: find یورو keyword, then grab the next 6-9 digit number after it
+        eur_pos = txt_norm.find("یورو")
+        if eur_pos >= 0:
+            after_eur = txt_norm[eur_pos:]
+            m2 = re.search(r"([\d,]{6,9})", after_eur)
+            if m2:
+                val_str = m2.group(1).replace(",", "")
+                if val_str.isdigit():
+                    val = int(val_str)
+                    if 150_000 <= val <= 350_000:
+                        log.info("EUR fallback (after-keyword): %d from %s", val, txt[:60])
+                        return float(val)
     return None
 
 
