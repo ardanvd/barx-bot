@@ -278,8 +278,11 @@ def extract_pi_jt_usd(posts: List[Dict[str, Any]]) -> Tuple[Optional[int], Optio
                     if 100_000 <= val <= 300_000:
                         nums.append(val)
             if len(nums) >= 2:
-                log.info("pi_jt USD extracted: buy=%d sell=%d from: %s", nums[0], nums[1], txt[:80])
-                return nums[0], nums[1]
+                # Enforce exact spread: buy is the lower, sell = buy + USD_SPREAD
+                buy = min(nums[0], nums[1])
+                sell = buy + USD_SPREAD
+                log.info("pi_jt USD extracted: buy=%d sell=%d (spread enforced) from: %s", buy, sell, txt[:80])
+                return buy, sell
             elif len(nums) == 1:
                 # Only one number found; derive sell with spread
                 buy = nums[0]
@@ -309,8 +312,11 @@ def extract_pi_jt_eur(posts: List[Dict[str, Any]]) -> Tuple[Optional[int], Optio
                     if 150_000 <= val <= 300_000:
                         nums.append(val)
             if len(nums) >= 2:
-                log.info("pi_jt EUR extracted: buy=%d sell=%d from: %s", nums[0], nums[1], txt[:80])
-                return nums[0], nums[1]
+                # Enforce exact spread: buy is the lower, sell = buy + EUR_SPREAD
+                buy = min(nums[0], nums[1])
+                sell = buy + EUR_SPREAD
+                log.info("pi_jt EUR extracted: buy=%d sell=%d (spread enforced) from: %s", buy, sell, txt[:80])
+                return buy, sell
             elif len(nums) == 1:
                 buy = nums[0]
                 sell = buy + EUR_SPREAD
