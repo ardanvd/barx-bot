@@ -734,3 +734,22 @@
 2026-04-25 16:02:30,657 [INFO] TRY mid calculated: 155600.00 / 45.0240 = 3455.93 -> Buy: 3370, Sell: 3470
 2026-04-25 16:02:30,658 [INFO] cycle Tehran=19:32 changed=True silent=60.6min -> post (change)
 2026-04-25 16:02:31,142 [INFO] cycle result: {'action': 'posted', 'detail': 'change'}
+2026-04-25 16:08:37,696 [INFO] pi_jt USD sell post found: 156100 from: دلار فردایی تهران
+⏳
+156,100 فروش
+🔴
+2026-04-25 16:08:37,696 [INFO] pi_jt USD final (sell-only): buy=155100 sell=156100 (spread enforced)
+2026-04-25 16:08:37,697 [INFO] pi_jt EUR not found, trying fallback sources
+2026-04-25 16:08:38,394 [INFO] EUR fallback (sell pattern): 182990 from 💵
+دلار آمریکا فروش
+🔴
+: 156,100 تومان
+💵
+دلار آمریکا خرید
+🔵
+: 
+2026-04-25 16:08:38,394 [INFO] EUR fallback computed: mid=182990 buy=182500 sell=183500
+2026-04-25 16:08:38,394 [INFO] Prices fetched: USD buy=155100 sell=156100 (src=pi_jt) | EUR buy=182500 sell=183500 (src=navasanchannel)
+2026-04-25 16:08:38,784 [INFO] TRY mid calculated: 155600.00 / 45.0240 = 3455.93 -> Buy: 3370, Sell: 3470
+2026-04-25 16:08:38,784 [INFO] cycle Tehran=19:38 changed=False silent=6.2min -> skip (no_change_within_silence_window)
+2026-04-25 16:08:38,785 [INFO] cycle result: {'action': 'skip', 'detail': 'no_change_within_silence_window'}
