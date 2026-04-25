@@ -257,71 +257,115 @@ def get_source_snapshot(username: str) -> Dict[str, Any]:
 
 # -------------------- pi_jt extractors (PRIMARY) --------------------
 
+def _extract_num_from_post(txt: str, min_val: int, max_val: int) -> Optional[int]:
+    """Extract the first valid price number from a post text."""
+    txt_norm = txt.translate(PERSIAN_DIGITS)
+    for m in NUM_RE.finditer(txt_norm):
+        raw = m.group(0).replace(",", "")
+        if raw.isdigit() and len(raw) >= 5:
+            val = int(raw)
+            if min_val <= val <= max_val:
+                return val
+    return None
+
+
 def extract_pi_jt_usd(posts: List[Dict[str, Any]]) -> Tuple[Optional[int], Optional[int]]:
     """
     Extract Tehran forward USD buy/sell from @pi_jt.
-    Format: دلار تـهران فردایی 💸 : 154,000 خریـدار 🔴 154,500 فروشنده
+    Posts are published separately: one post for buy (خرید/خریدار) and one for sell (فروش/فروشنده).
+    We scan all recent posts, find the latest buy price and latest sell price independently,
+    then enforce the 1000 Toman spread (buy = lower, sell = buy + USD_SPREAD).
     Returns (buy, sell) or (None, None).
     """
+    latest_buy: Optional[int] = None
+    latest_sell: Optional[int] = None
+
     for p in reversed(posts):
         txt = p.get("text", "")
         if not txt:
             continue
-        # Must mention Tehran dollar (not Herat)
-        if ("دلار تـهران" in txt or "دلار تهران" in txt) and ("هرات" not in txt):
-            txt_norm = txt.translate(PERSIAN_DIGITS)
-            nums = []
-            for m in NUM_RE.finditer(txt_norm):
-                raw = m.group(0).replace(",", "")
-                if raw.isdigit() and len(raw) >= 5:
-                    val = int(raw)
-                    if 100_000 <= val <= 300_000:
-                        nums.append(val)
-            if len(nums) >= 2:
-                # Enforce exact spread: buy is the lower, sell = buy + USD_SPREAD
-                buy = min(nums[0], nums[1])
-                sell = buy + USD_SPREAD
-                log.info("pi_jt USD extracted: buy=%d sell=%d (spread enforced) from: %s", buy, sell, txt[:80])
-                return buy, sell
-            elif len(nums) == 1:
-                # Only one number found; derive sell with spread
-                buy = nums[0]
-                sell = buy + USD_SPREAD
-                log.info("pi_jt USD extracted (1 num): buy=%d sell=%d", buy, sell)
-                return buy, sell
+        # Must mention Tehran dollar (فردایی or نقدی), not Herat
+        is_tehran_usd = (
+            ("دلار فردایی تهران" in txt or "دلار فردایی تـهران" in txt
+             or "دلار نقدی تهران" in txt or "دلار نـقدی تهران" in txt
+             or "دلار نـــقـدی تهران" in txt)
+            and "هرات" not in txt
+        )
+        if not is_tehran_usd:
+            continue
+        val = _extract_num_from_post(txt, 100_000, 300_000)
+        if val is None:
+            continue
+        is_buy = "خرید" in txt or "خریدار" in txt or "خریـدار" in txt or "خـریدار" in txt
+        is_sell = "فروش" in txt or "فروشنده" in txt
+        if is_buy and latest_buy is None:
+            latest_buy = val
+            log.info("pi_jt USD buy post found: %d from: %s", val, txt[:80])
+        if is_sell and latest_sell is None:
+            latest_sell = val
+            log.info("pi_jt USD sell post found: %d from: %s", val, txt[:80])
+        if latest_buy is not None and latest_sell is not None:
+            break
+
+    if latest_buy is not None:
+        buy = latest_buy
+        sell = buy + USD_SPREAD
+        log.info("pi_jt USD final: buy=%d sell=%d (spread enforced)", buy, sell)
+        return buy, sell
+    if latest_sell is not None:
+        sell = latest_sell
+        buy = sell - USD_SPREAD
+        log.info("pi_jt USD final (sell-only): buy=%d sell=%d (spread enforced)", buy, sell)
+        return buy, sell
     return None, None
 
 
 def extract_pi_jt_eur(posts: List[Dict[str, Any]]) -> Tuple[Optional[int], Optional[int]]:
     """
     Extract Tehran forward EUR buy/sell from @pi_jt.
-    Format: یورو تـهران فردایی 💸 : 181,000 خریـدار 🔴 181,500 فروشنده
+    Posts are published separately: one post for buy (خرید/خریدار) and one for sell (فروش/فروشنده).
+    We scan all recent posts, find the latest buy price and latest sell price independently,
+    then enforce the 1000 Toman spread (buy = lower, sell = buy + EUR_SPREAD).
     Returns (buy, sell) or (None, None).
     """
+    latest_buy: Optional[int] = None
+    latest_sell: Optional[int] = None
+
     for p in reversed(posts):
         txt = p.get("text", "")
         if not txt:
             continue
-        if ("یورو" in txt) and ("تهران" in txt or "تـهران" in txt):
-            txt_norm = txt.translate(PERSIAN_DIGITS)
-            nums = []
-            for m in NUM_RE.finditer(txt_norm):
-                raw = m.group(0).replace(",", "")
-                if raw.isdigit() and len(raw) >= 5:
-                    val = int(raw)
-                    if 150_000 <= val <= 300_000:
-                        nums.append(val)
-            if len(nums) >= 2:
-                # Enforce exact spread: buy is the lower, sell = buy + EUR_SPREAD
-                buy = min(nums[0], nums[1])
-                sell = buy + EUR_SPREAD
-                log.info("pi_jt EUR extracted: buy=%d sell=%d (spread enforced) from: %s", buy, sell, txt[:80])
-                return buy, sell
-            elif len(nums) == 1:
-                buy = nums[0]
-                sell = buy + EUR_SPREAD
-                log.info("pi_jt EUR extracted (1 num): buy=%d sell=%d", buy, sell)
-                return buy, sell
+        is_tehran_eur = (
+            "یورو" in txt
+            and ("تهران" in txt or "تـهران" in txt)
+            and "دیجیتال" not in txt and "کریپتو" not in txt and "بیت" not in txt
+        )
+        if not is_tehran_eur:
+            continue
+        val = _extract_num_from_post(txt, 150_000, 350_000)
+        if val is None:
+            continue
+        is_buy = "خرید" in txt or "خریدار" in txt or "خریـدار" in txt or "خـریدار" in txt
+        is_sell = "فروش" in txt or "فروشنده" in txt
+        if is_buy and latest_buy is None:
+            latest_buy = val
+            log.info("pi_jt EUR buy post found: %d from: %s", val, txt[:80])
+        if is_sell and latest_sell is None:
+            latest_sell = val
+            log.info("pi_jt EUR sell post found: %d from: %s", val, txt[:80])
+        if latest_buy is not None and latest_sell is not None:
+            break
+
+    if latest_buy is not None:
+        buy = latest_buy
+        sell = buy + EUR_SPREAD
+        log.info("pi_jt EUR final: buy=%d sell=%d (spread enforced)", buy, sell)
+        return buy, sell
+    if latest_sell is not None:
+        sell = latest_sell
+        buy = sell - EUR_SPREAD
+        log.info("pi_jt EUR final (sell-only): buy=%d sell=%d (spread enforced)", buy, sell)
+        return buy, sell
     return None, None
 
 
@@ -355,7 +399,8 @@ def extract_usd_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
 def extract_eur_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
     """
     Fallback EUR extractor for @navasanchannel / @irancurrency.
-    Specifically looks for یورو keyword with Tehran context.
+    Handles both single-number posts and combined buy/sell posts.
+    Returns the sell price (mid reference) so the caller can apply spread.
     """
     for p in reversed(posts):
         txt = p.get("text", "")
@@ -366,12 +411,21 @@ def extract_eur_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
         # Must not be a crypto/digital currency post
         if "دیجیتال" in txt or "کریپتو" in txt or "بیت" in txt:
             continue
-        m = re.search(r"(?:یورو|EUR)[^\d]*([\d,]{6,8})", txt)
-        if m:
-            val_str = m.group(1).replace(",", "")
+        txt_norm = txt.translate(PERSIAN_DIGITS)
+        # Try to find EUR sell price explicitly (فروش after یورو)
+        sell_match = re.search(r"یورو[^\d\n]{0,30}فروش[^\d]*(\d[\d,]{5,7})", txt_norm)
+        if sell_match:
+            val_str = sell_match.group(1).replace(",", "")
             if val_str.isdigit():
                 val = int(val_str)
-                if 150_000 <= val <= 300_000:
+                if 150_000 <= val <= 350_000:
+                    return float(val)
+        # Fallback: first EUR-range number in post
+        for m in NUM_RE.finditer(txt_norm):
+            raw = m.group(0).replace(",", "")
+            if raw.isdigit() and len(raw) >= 6:
+                val = int(raw)
+                if 150_000 <= val <= 350_000:
                     return float(val)
     return None
 
