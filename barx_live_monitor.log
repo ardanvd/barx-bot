@@ -516,3 +516,11 @@
 2026-04-25 10:31:01,415 [INFO] TRY mid calculated: 156000.00 / 45.0240 = 3464.82 -> Buy: 3370, Sell: 3470
 2026-04-25 10:31:01,415 [INFO] cycle Tehran=14:00 changed=True silent=27.8min -> post (change)
 2026-04-25 10:31:01,826 [INFO] cycle result: {'action': 'posted', 'detail': 'change'}
+2026-04-25 11:00:58,600 [INFO] pi_jt USD not found, trying fallback sources
+2026-04-25 11:00:59,461 [INFO] USD fallback computed: mid=155800 buy=155300 sell=156300
+2026-04-25 11:00:59,461 [INFO] pi_jt EUR not found, trying fallback sources
+2026-04-25 11:00:59,991 [INFO] EUR fallback computed: mid=182760 buy=182250 sell=183250
+2026-04-25 11:00:59,991 [INFO] Prices fetched: USD buy=155300 sell=156300 (src=dollar_tehran3bze+tahran_sabza) | EUR buy=182250 sell=183250 (src=navasanchannel)
+2026-04-25 11:01:00,268 [INFO] TRY mid calculated: 155800.00 / 45.0240 = 3460.38 -> Buy: 3370, Sell: 3470
+2026-04-25 11:01:00,268 [INFO] cycle Tehran=14:30 changed=True silent=30.0min -> post (change)
+2026-04-25 11:01:00,690 [INFO] cycle result: {'action': 'posted', 'detail': 'change'}
