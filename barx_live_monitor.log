@@ -888,3 +888,5 @@
 2026-04-25 20:07:13,339 [INFO] cycle result: {'action': 'posted', 'detail': 'silence_limit'}
 2026-04-25 22:04:12,530 [INFO] outside working hours (Tehran 01:34); sleeping
 2026-04-25 22:04:12,530 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
+2026-04-26 03:04:46,200 [INFO] outside working hours (Tehran 06:34); sleeping
+2026-04-26 03:04:46,201 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
