@@ -663,7 +663,7 @@ def run_cycle() -> Dict[str, Any]:
     usd_lira, eur_lira = try_lira_rates()
     last = state.get("last_keys", {})
 
-    effective_usd_lira = usd_lira if (usd_lira and 30 <= usd_lira <= 60) else 44.91
+    effective_usd_lira = usd_lira if (usd_lira and 20 <= usd_lira <= 100) else last.get("try_usd_lira") or 45.0
     display_usd_lira = round(effective_usd_lira, 4)
 
     usd_mid_for_try = (usd_buy_raw + usd_sell_raw) / 2.0
