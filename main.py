@@ -441,22 +441,34 @@ def extract_eur_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
 def try_lira_rates() -> Tuple[Optional[float], Optional[float]]:
     """
     Returns (USD_in_Lira, EUR_in_Lira).
+    Primary: Wise live rates API (real-time, millisecond timestamps).
+    Fallback: open.er-api.com (daily update).
     """
+    # Primary: Wise live rates (real-time)
     try:
-        r = requests.get(
-            "https://api.exchangerate.host/latest",
-            params={"base": "USD", "symbols": "TRY,EUR"},
-            timeout=20,
+        r_usd = requests.get(
+            "https://wise.com/rates/live",
+            params={"source": "USD", "target": "TRY"},
+            headers={"User-Agent": USER_AGENT},
+            timeout=15,
         )
-        j = r.json()
-        rates = j.get("rates", {})
-        usd_try = rates.get("TRY")
-        usd_eur = rates.get("EUR")
-        if usd_try and usd_eur:
-            eur_try = usd_try / usd_eur
+        r_eur = requests.get(
+            "https://wise.com/rates/live",
+            params={"source": "EUR", "target": "TRY"},
+            headers={"User-Agent": USER_AGENT},
+            timeout=15,
+        )
+        j_usd = r_usd.json()
+        j_eur = r_eur.json()
+        usd_try = j_usd.get("value")
+        eur_try = j_eur.get("value")
+        if usd_try and eur_try and 20 <= usd_try <= 100 and 20 <= eur_try <= 120:
+            log.info("Wise TRY rates: USD/TRY=%.4f EUR/TRY=%.4f", usd_try, eur_try)
             return float(usd_try), float(eur_try)
+        log.warning("Wise returned out-of-range values: usd_try=%s eur_try=%s", usd_try, eur_try)
     except Exception as e:
-        log.info("exchangerate.host failed: %s", e)
+        log.info("Wise rates failed: %s", e)
+    # Fallback: open.er-api.com (updates daily)
     try:
         r = requests.get("https://open.er-api.com/v6/latest/USD", timeout=20)
         j = r.json()
@@ -465,6 +477,7 @@ def try_lira_rates() -> Tuple[Optional[float], Optional[float]]:
         usd_eur = rates.get("EUR")
         if usd_try and usd_eur:
             eur_try = usd_try / usd_eur
+            log.info("open.er-api TRY rates: USD/TRY=%.4f EUR/TRY=%.4f", usd_try, eur_try)
             return float(usd_try), float(eur_try)
     except Exception as e:
         log.info("open.er-api.com failed: %s", e)
