@@ -59,7 +59,7 @@ USD_WEIGHT_B = 0.25
 EUR_FALLBACK_A = "navasanchannel"
 EUR_FALLBACK_B = "irancurrency"
 
-SILENCE_LIMIT_MIN = 30              # minutes; post every 30 min if price changed
+SILENCE_LIMIT_MIN = 60              # minutes; post every 60 min if price unchanged
 WORKING_HOURS_START = 9             # 09:00 Tehran
 WORKING_HOURS_END = 24              # 00:00 next day (exclusive)
 
