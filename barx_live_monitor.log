@@ -2741,3 +2741,5 @@
 2026-04-28 18:33:03,164 [INFO] TRY mid calculated: 167000.00 / 45.0399 = 3707.82 -> Buy: 3620, Sell: 3720
 2026-04-28 18:33:03,165 [INFO] cycle Tehran=22:03 changed=False silent=29.4min -> skip (no_change_within_silence_window)
 2026-04-28 18:33:03,165 [INFO] cycle result: {'action': 'skip', 'detail': 'no_change_within_silence_window'}
+2026-04-28 21:45:51,718 [INFO] outside working hours (Tehran 01:15); sleeping
+2026-04-28 21:45:51,719 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
