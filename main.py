@@ -394,6 +394,43 @@ def extract_usd_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
     return None
 
 
+# -------------------- Fallback USD from navasanchannel --------------------
+
+def extract_usd_tomans_navasanchannel(posts: List[Dict[str, Any]]) -> Optional[float]:
+    """
+    Extract USD sell price from @navasanchannel posts.
+    Posts contain lines like:
+      دلار آمریکا فروش 🔴 : 161,800 تومان
+    or table-style:
+      دلار آمریکا 161,800
+    Returns the sell price (mid for spread calculation).
+    """
+    for p in reversed(posts):
+        txt = p.get("text", "")
+        if not txt:
+            continue
+        if "دلار" not in txt:
+            continue
+        if "دیجیتال" in txt or "کریپتو" in txt or "بیت" in txt:
+            continue
+        txt_norm = txt.translate(PERSIAN_DIGITS)
+        # Strategy 1: explicit sell pattern
+        m1 = re.search(r"دلار[^\n]*فروش[^\n]*[:\-]?\s*([\d,]{6,9})", txt_norm)
+        if m1:
+            val = int(m1.group(1).replace(",", ""))
+            if 100_000 <= val <= 300_000:
+                log.info("navasanchannel USD (sell pattern): %d from %s", val, txt[:60])
+                return float(val)
+        # Strategy 2: دلار آمریکا followed by a 6-digit number
+        m2 = re.search(r"دلار[\s\S]{0,30}?([\d,]{6,9})", txt_norm)
+        if m2:
+            val = int(m2.group(1).replace(",", ""))
+            if 100_000 <= val <= 300_000:
+                log.info("navasanchannel USD (keyword): %d from %s", val, txt[:60])
+                return float(val)
+    return None
+
+
 # -------------------- Fallback EUR extractor --------------------
 
 def extract_eur_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
@@ -613,7 +650,27 @@ def run_cycle() -> Dict[str, Any]:
     usd_source = "none"
     eur_source = "none"
 
-    if pi_snap["ok"]:
+    PI_JT_MAX_STALE_MIN = 180  # if pi_jt latest post is older than 3 hours, treat as stale
+    pi_jt_fresh = False
+    if pi_snap["ok"] and pi_snap.get("clock"):
+        try:
+            pi_clock = dt.datetime.fromisoformat(pi_snap["clock"])
+            if pi_clock.tzinfo is None:
+                pi_clock = pi_clock.replace(tzinfo=dt.timezone.utc)
+            pi_age_min = (t_utc - pi_clock).total_seconds() / 60.0
+            if pi_age_min <= PI_JT_MAX_STALE_MIN:
+                pi_jt_fresh = True
+                log.info("pi_jt latest post age: %.1f min (fresh)", pi_age_min)
+            else:
+                log.warning("pi_jt latest post is %.1f min old (STALE > %d min) — skipping pi_jt",
+                            pi_age_min, PI_JT_MAX_STALE_MIN)
+        except Exception as e:
+            log.warning("pi_jt clock parse error: %s", e)
+            pi_jt_fresh = True  # assume fresh if can't parse
+    elif pi_snap["ok"]:
+        pi_jt_fresh = True  # no clock info, assume fresh
+
+    if pi_jt_fresh:
         usd_buy_raw, usd_sell_raw = extract_pi_jt_usd(pi_snap["posts"])
         eur_buy_raw, eur_sell_raw = extract_pi_jt_eur(pi_snap["posts"])
         if usd_buy_raw:
@@ -643,6 +700,18 @@ def run_cycle() -> Dict[str, Any]:
             usd_buy_raw, usd_sell_raw = spread(usd_mid, USD_SPREAD)
             usd_source = f"{USD_FALLBACK_A}+{USD_FALLBACK_B}"
             log.info("USD fallback computed: mid=%.0f buy=%d sell=%d", usd_mid, usd_buy_raw, usd_sell_raw)
+
+        # -------- Last-resort USD fallback: navasanchannel --------
+        if usd_buy_raw is None:
+            log.info("All USD fallbacks failed, trying navasanchannel for USD")
+            navas_snap = get_source_snapshot(EUR_FALLBACK_A)
+            if navas_snap["ok"]:
+                usd_navas = extract_usd_tomans_navasanchannel(navas_snap["posts"])
+                if usd_navas:
+                    usd_buy_raw, usd_sell_raw = spread(usd_navas, USD_SPREAD)
+                    usd_source = EUR_FALLBACK_A
+                    log.info("USD navasanchannel fallback: mid=%.0f buy=%d sell=%d",
+                             usd_navas, usd_buy_raw, usd_sell_raw)
 
     # -------- Fallback EUR if pi_jt didn't yield --------
     eur_fallback_a_snap = {"ok": False, "posts": [], "clock": None}
