@@ -3352,3 +3352,5 @@
 2026-04-29 18:35:18,677 [INFO] cycle result: {'action': 'posted', 'detail': 'silence_limit'}
 2026-04-29 20:45:47,704 [INFO] outside working hours (Tehran 00:15); sleeping
 2026-04-29 20:45:47,704 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
+2026-04-30 00:08:57,181 [INFO] outside working hours (Tehran 03:38); sleeping
+2026-04-30 00:08:57,181 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
