@@ -1,5 +1,5 @@
 {
-  "last_post_utc": "2026-04-30T08:35:05.628777+00:00",
+  "last_post_utc": "2026-04-30T09:31:47.208889+00:00",
   "last_keys": {
     "usd_buy": 177500,
     "usd_sell": 178500,
@@ -7,16 +7,16 @@
     "eur_sell": 208600,
     "try_buy": 3850,
     "try_sell": 3950,
-    "try_usd_lira": 45.1851,
-    "try_eur_lira": 52.8078
+    "try_usd_lira": 45.1852,
+    "try_eur_lira": 52.8373
   },
   "last_source_clocks": {
-    "pi_jt": "2026-04-30T08:28:28+00:00",
+    "pi_jt": "2026-04-30T09:08:05+00:00",
     "dollar_tehran3bze": null,
     "tahran_sabza": null,
-    "navasanchannel": "2026-04-30T09:00:25+00:00",
+    "navasanchannel": "2026-04-30T09:30:26+00:00",
     "irancurrency": null
   },
   "end_of_trading_date": null,
-  "last_cycle_utc": "2026-04-30T09:04:52.953175+00:00"
+  "last_cycle_utc": "2026-04-30T09:31:47.208889+00:00"
 }
