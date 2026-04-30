@@ -47,7 +47,12 @@ ENV_PATH = HOME / ".barx_env"
 CHANNEL = "@barxexchange"
 ORDER_CONTACT = "@barx_exchangee"
 
-# Primary source: pi_jt (Tehran forward dollar & euro)
+# Primary source: dollar_sulaymaniyah (Sulaymaniyah market price)
+USD_PRIMARY = "dollar_sulaymaniyah"
+USD_SULAYMANIYAH_MARKUP = 1100   # 800 transport + 300 profit
+USD_SULAYMANIYAH_SPREAD = 2000   # buy = sell - 2000
+
+# Secondary source: pi_jt (Tehran forward dollar & euro)
 USD_EUR_PRIMARY = "pi_jt"
 
 # Fallback USD sources
@@ -370,6 +375,41 @@ def extract_pi_jt_eur(posts: List[Dict[str, Any]]) -> Tuple[Optional[int], Optio
     return None, None
 
 
+# -------------------- dollar_sulaymaniyah primary extractor --------------------
+
+def extract_usd_sulaymaniyah(posts: List[Dict[str, Any]]) -> Optional[float]:
+    """
+    Extract USD sell price from @dollar_sulaymaniyah posts.
+    Posts look like:
+      سلێمانی شەمە 💰 177,000 فروش 🔴
+      سلێمانی شەمە 💰 176,700 خــرید 🔵
+    We prefer the فروش (sell) post; fallback to خرید (buy) post.
+    Returns the raw market sell price (before markup).
+    """
+    latest_sell: Optional[int] = None
+    latest_buy: Optional[int] = None
+    for p in reversed(posts):
+        txt = p.get("text", "")
+        if not txt:
+            continue
+        txt_norm = txt.translate(PERSIAN_DIGITS)
+        for m in NUM_RE.finditer(txt_norm):
+            raw = m.group(0).replace(",", "")
+            if raw.isdigit() and len(raw) >= 5:
+                val = int(raw)
+                if 100_000 <= val <= 300_000:
+                    if "فروش" in txt and latest_sell is None:
+                        latest_sell = val
+                        log.info("sulaymaniyah sell post: %d from: %s", val, txt[:80])
+                    elif "خرید" in txt and latest_buy is None:
+                        latest_buy = val
+                        log.info("sulaymaniyah buy post: %d from: %s", val, txt[:80])
+                    break
+        if latest_sell is not None:
+            break
+    return float(latest_sell) if latest_sell is not None else (float(latest_buy) if latest_buy is not None else None)
+
+
 # -------------------- Fallback USD extractor --------------------
 
 def extract_usd_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[float]:
@@ -642,8 +682,7 @@ def run_cycle() -> Dict[str, Any]:
         result.update({"action": "idle", "detail": "outside_working_hours"})
         return result
 
-    # -------- Gather prices from PRIMARY source: pi_jt --------
-    pi_snap = get_source_snapshot(USD_EUR_PRIMARY)
+    # -------- PRIMARY USD source: dollar_sulaymaniyah --------
     usd_buy_raw: Optional[int] = None
     usd_sell_raw: Optional[int] = None
     eur_buy_raw: Optional[int] = None
@@ -651,37 +690,44 @@ def run_cycle() -> Dict[str, Any]:
     usd_source = "none"
     eur_source = "none"
 
-    PI_JT_MAX_STALE_MIN = 180  # if pi_jt latest post is older than 3 hours, treat as stale
-    pi_jt_fresh = False
-    if pi_snap["ok"] and pi_snap.get("clock"):
-        try:
-            pi_clock = dt.datetime.fromisoformat(pi_snap["clock"])
-            if pi_clock.tzinfo is None:
-                pi_clock = pi_clock.replace(tzinfo=dt.timezone.utc)
-            pi_age_min = (t_utc - pi_clock).total_seconds() / 60.0
-            if pi_age_min <= PI_JT_MAX_STALE_MIN:
-                pi_jt_fresh = True
-                log.info("pi_jt latest post age: %.1f min (fresh)", pi_age_min)
-            else:
-                log.warning("pi_jt latest post is %.1f min old (STALE > %d min) — skipping pi_jt",
-                            pi_age_min, PI_JT_MAX_STALE_MIN)
-        except Exception as e:
-            log.warning("pi_jt clock parse error: %s", e)
-            pi_jt_fresh = True  # assume fresh if can't parse
-    elif pi_snap["ok"]:
-        pi_jt_fresh = True  # no clock info, assume fresh
+    sulaymaniyah_snap = get_source_snapshot(USD_PRIMARY)
+    if sulaymaniyah_snap["ok"]:
+        sul_price = extract_usd_sulaymaniyah(sulaymaniyah_snap["posts"])
+        if sul_price:
+            usd_sell_raw = int(sul_price) + USD_SULAYMANIYAH_MARKUP
+            usd_buy_raw = usd_sell_raw - USD_SULAYMANIYAH_SPREAD
+            usd_source = USD_PRIMARY
+            log.info("sulaymaniyah USD: market=%.0f sell=%d buy=%d", sul_price, usd_sell_raw, usd_buy_raw)
 
-    if pi_jt_fresh:
-        usd_buy_raw, usd_sell_raw = extract_pi_jt_usd(pi_snap["posts"])
-        eur_buy_raw, eur_sell_raw = extract_pi_jt_eur(pi_snap["posts"])
-        if usd_buy_raw:
-            usd_source = USD_EUR_PRIMARY
-        if eur_buy_raw:
-            eur_source = USD_EUR_PRIMARY
-
-    # -------- Fallback USD if pi_jt didn't yield --------
+    # -------- Fallback USD: pi_jt --------
+    pi_snap = {"ok": False, "posts": [], "clock": None}
     usd_fallback_a_snap = {"ok": False, "posts": [], "clock": None}
     usd_fallback_b_snap = {"ok": False, "posts": [], "clock": None}
+    if usd_buy_raw is None:
+        log.info("sulaymaniyah USD not found, trying pi_jt")
+        pi_snap = get_source_snapshot(USD_EUR_PRIMARY)
+        PI_JT_MAX_STALE_MIN = 180
+        pi_jt_fresh = False
+        if pi_snap["ok"] and pi_snap.get("clock"):
+            try:
+                pi_clock = dt.datetime.fromisoformat(pi_snap["clock"])
+                if pi_clock.tzinfo is None:
+                    pi_clock = pi_clock.replace(tzinfo=dt.timezone.utc)
+                pi_age_min = (t_utc - pi_clock).total_seconds() / 60.0
+                if pi_age_min <= PI_JT_MAX_STALE_MIN:
+                    pi_jt_fresh = True
+                else:
+                    log.warning("pi_jt stale: %.1f min", pi_age_min)
+            except Exception as e:
+                log.warning("pi_jt clock parse error: %s", e)
+                pi_jt_fresh = True
+        elif pi_snap["ok"]:
+            pi_jt_fresh = True
+        if pi_jt_fresh:
+            usd_buy_raw, usd_sell_raw = extract_pi_jt_usd(pi_snap["posts"])
+            if usd_buy_raw:
+                usd_source = USD_EUR_PRIMARY
+
     if usd_buy_raw is None:
         log.info("pi_jt USD not found, trying fallback sources")
         usd_fallback_a_snap = get_source_snapshot(USD_FALLBACK_A)
@@ -696,7 +742,6 @@ def run_cycle() -> Dict[str, Any]:
             usd_mid = usd_b
         else:
             usd_mid = None
-
         if usd_mid:
             usd_buy_raw, usd_sell_raw = spread(usd_mid, USD_SPREAD)
             usd_source = f"{USD_FALLBACK_A}+{USD_FALLBACK_B}"
@@ -715,6 +760,18 @@ def run_cycle() -> Dict[str, Any]:
                              usd_navas, usd_buy_raw, usd_sell_raw)
 
     # -------- Fallback EUR if pi_jt didn't yield --------
+    # -------- EUR from pi_jt (fetch if not already fetched) --------
+    if eur_buy_raw is None and pi_snap["ok"]:
+        eur_buy_raw, eur_sell_raw = extract_pi_jt_eur(pi_snap["posts"])
+        if eur_buy_raw:
+            eur_source = USD_EUR_PRIMARY
+    if eur_buy_raw is None and not pi_snap["ok"]:
+        pi_snap = get_source_snapshot(USD_EUR_PRIMARY)
+        if pi_snap["ok"]:
+            eur_buy_raw, eur_sell_raw = extract_pi_jt_eur(pi_snap["posts"])
+            if eur_buy_raw:
+                eur_source = USD_EUR_PRIMARY
+
     eur_fallback_a_snap = {"ok": False, "posts": [], "clock": None}
     eur_fallback_b_snap = {"ok": False, "posts": [], "clock": None}
     if eur_buy_raw is None:
