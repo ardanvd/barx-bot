@@ -747,7 +747,7 @@ def run_cycle() -> Dict[str, Any]:
     last = state.get("last_keys", {})
 
     effective_usd_lira = usd_lira if (usd_lira and 20 <= usd_lira <= 100) else last.get("try_usd_lira") or 45.0
-    display_usd_lira = round(effective_usd_lira, 4)
+    display_usd_lira = math.floor(effective_usd_lira)  # floor rate so price is always higher
 
     usd_sell_for_try = float(usd_sell_raw)
     try_mid = usd_sell_for_try / display_usd_lira
