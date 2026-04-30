@@ -28,6 +28,7 @@ import re
 import json
 import time
 import html
+import math
 import logging
 import datetime as dt
 from pathlib import Path
@@ -525,12 +526,12 @@ def try_lira_rates() -> Tuple[Optional[float], Optional[float]]:
 
 def spread(mid: float, spread_value: int, step: int = 50) -> Tuple[int, int]:
     if spread_value == 100:
-        mid_rounded = int(round(mid / 10.0) * 10)
-        sell = mid_rounded + 10
+        # TRY: always ceil sell to nearest 10, buy = sell - 100
+        sell = int(math.ceil(mid / 10.0) * 10)
         buy = sell - 100
         return buy, sell
-    buy = int(round((mid - spread_value / 2) / step) * step)
-    sell = buy + spread_value
+    sell = int(math.ceil((mid + spread_value / 2) / step) * step)
+    buy = sell - spread_value
     return buy, sell
 
 
