@@ -749,11 +749,11 @@ def run_cycle() -> Dict[str, Any]:
     effective_usd_lira = usd_lira if (usd_lira and 20 <= usd_lira <= 100) else last.get("try_usd_lira") or 45.0
     display_usd_lira = round(effective_usd_lira, 4)
 
-    usd_mid_for_try = (usd_buy_raw + usd_sell_raw) / 2.0
-    try_mid = usd_mid_for_try / display_usd_lira
+    usd_sell_for_try = float(usd_sell_raw)
+    try_mid = usd_sell_for_try / display_usd_lira
     try_buy, try_sell = spread(try_mid, TRY_SPREAD, step=10)
-    log.info("TRY mid calculated: %.2f / %.4f = %.2f -> Buy: %d, Sell: %d",
-             usd_mid_for_try, display_usd_lira, try_mid, try_buy, try_sell)
+    log.info("TRY calculated: %.2f / %.4f = %.2f -> Buy: %d, Sell: %d",
+             usd_sell_for_try, display_usd_lira, try_mid, try_buy, try_sell)
 
     new_keys = {
         "usd_buy": usd_buy_raw, "usd_sell": usd_sell_raw,
