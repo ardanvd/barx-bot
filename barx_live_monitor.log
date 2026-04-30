@@ -3436,3 +3436,14 @@
 2026-04-30 07:01:57,158 [INFO] TRY mid calculated: 177000.00 / 45.1850 = 3917.23 -> Buy: 3830, Sell: 3930
 2026-04-30 07:01:57,159 [INFO] cycle Tehran=10:31 changed=False silent=26.5min -> skip (no_change_within_silence_window)
 2026-04-30 07:01:57,159 [INFO] cycle result: {'action': 'skip', 'detail': 'no_change_within_silence_window'}
+2026-04-30 07:32:22,973 [WARNING] fetch pi_jt -> HTTP 502
+2026-04-30 07:32:22,974 [INFO] pi_jt USD not found, trying fallback sources
+2026-04-30 07:32:23,260 [WARNING] fetch dollar_tehran3bze -> HTTP 502
+2026-04-30 07:32:23,552 [WARNING] fetch tahran_sabza -> HTTP 502
+2026-04-30 07:32:23,553 [INFO] All USD fallbacks failed, trying navasanchannel for USD
+2026-04-30 07:32:23,847 [WARNING] fetch navasanchannel -> HTTP 502
+2026-04-30 07:32:23,847 [INFO] pi_jt EUR not found, trying fallback sources
+2026-04-30 07:32:24,140 [WARNING] fetch navasanchannel -> HTTP 502
+2026-04-30 07:32:24,429 [WARNING] fetch irancurrency -> HTTP 502
+2026-04-30 07:32:24,430 [WARNING] No fresh price available: usd_source=none eur_source=none — SKIPPING to avoid stale post
+2026-04-30 07:32:24,430 [INFO] cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
