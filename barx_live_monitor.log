@@ -3915,3 +3915,23 @@
 2026-04-30 15:33:55,458 [WARNING] fetch irancurrency -> HTTP 502
 2026-04-30 15:33:55,459 [WARNING] No fresh price available: usd_source=none eur_source=none — SKIPPING to avoid stale post
 2026-04-30 15:33:55,459 [INFO] cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-04-30 15:37:52,955 [INFO] sulaymaniyah sell post: 176800 from: سلێمانی چوار شەمە
+💰
+176,800 فروش
+🔴
+2026-04-30 15:37:52,955 [INFO] sulaymaniyah USD: market=176800 sell=177900 buy=175900
+2026-04-30 15:37:53,530 [INFO] pi_jt EUR not found, trying fallback sources
+2026-04-30 15:37:54,221 [INFO] EUR fallback (sell pattern): 206040 from 💵
+دلار آمریکا فروش
+🔴
+: 176,000 تومان
+💵
+دلار آمریکا خرید
+🔵
+: 
+2026-04-30 15:37:54,221 [INFO] EUR fallback computed: mid=206040 buy=205550 sell=206550
+2026-04-30 15:37:54,221 [INFO] Prices fetched: USD buy=175900 sell=177900 (src=dollar_sulaymaniyah) | EUR buy=205550 sell=206550 (src=navasanchannel)
+2026-04-30 15:37:54,633 [INFO] Wise TRY rates: USD/TRY=45.1848 EUR/TRY=53.0131
+2026-04-30 15:37:54,635 [INFO] TRY calculated: 177900.00 / 45.0000 = 3953.33 -> Buy: 3860, Sell: 3960
+2026-04-30 15:37:54,635 [INFO] cycle Tehran=19:07 changed=True silent=never -> post (change)
+2026-04-30 15:37:55,320 [INFO] cycle result: {'action': 'posted', 'detail': 'change'}
