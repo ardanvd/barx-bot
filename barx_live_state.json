@@ -11,12 +11,12 @@
     "try_eur_lira": 53.0141
   },
   "last_source_clocks": {
-    "pi_jt": "2026-04-30T17:36:19+00:00",
+    "pi_jt": "2026-05-01T09:49:36+00:00",
     "dollar_tehran3bze": null,
     "tahran_sabza": null,
-    "navasanchannel": "2026-05-01T09:30:35+00:00",
+    "navasanchannel": "2026-05-01T10:00:36+00:00",
     "irancurrency": null
   },
   "end_of_trading_date": null,
-  "last_cycle_utc": "2026-05-01T09:30:41.210359+00:00"
+  "last_cycle_utc": "2026-05-01T10:04:09.739176+00:00"
 }
