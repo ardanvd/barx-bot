@@ -4103,3 +4103,5 @@
 2026-05-01 03:05:51,011 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
 2026-05-01 03:32:52,112 [INFO] outside working hours (Tehran 07:02); sleeping
 2026-05-01 03:32:52,113 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
+2026-05-01 04:04:21,658 [INFO] outside working hours (Tehran 07:34); sleeping
+2026-05-01 04:04:21,658 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
