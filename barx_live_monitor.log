@@ -4848,3 +4848,24 @@
 2026-05-02 08:34:36,625 [INFO] TRY calculated: 186100.00 / 45.0000 = 4135.56 -> Buy: 4040, Sell: 4140
 2026-05-02 08:34:36,625 [INFO] cycle Tehran=12:04 changed=True silent=31.3min -> post (change)
 2026-05-02 08:34:37,068 [INFO] cycle result: {'action': 'posted', 'detail': 'change'}
+2026-05-02 09:05:02,101 [INFO] sulaymaniyah sell post: 183000 from: سلیمانیه نقدى
+▫️
+183,000 فروش
+🔴
+تاك فيش
+2026-05-02 09:05:02,101 [INFO] sulaymaniyah USD: market=183000 sell=184100 buy=182100
+2026-05-02 09:05:02,640 [INFO] pi_jt EUR not found, trying fallback sources
+2026-05-02 09:05:03,285 [INFO] EUR fallback (sell pattern): 215160 from 💵
+دلار آمریکا فروش
+🔴
+: 183,500 تومان
+💵
+دلار آمریکا خرید
+🔵
+: 
+2026-05-02 09:05:03,285 [INFO] EUR fallback computed: mid=215160 buy=214700 sell=215700
+2026-05-02 09:05:03,285 [INFO] Prices fetched: USD buy=182100 sell=184100 (src=dollar_sulaymaniyah) | EUR buy=214700 sell=215700 (src=navasanchannel)
+2026-05-02 09:05:03,782 [INFO] Wise TRY rates: USD/TRY=45.1720 EUR/TRY=52.9461
+2026-05-02 09:05:03,784 [INFO] TRY calculated: 184100.00 / 45.0000 = 4091.11 -> Buy: 4000, Sell: 4100
+2026-05-02 09:05:03,784 [INFO] cycle Tehran=12:35 changed=True silent=30.5min -> post (change)
+2026-05-02 09:05:04,383 [INFO] cycle result: {'action': 'posted', 'detail': 'change'}
