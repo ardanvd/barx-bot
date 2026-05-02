@@ -4751,3 +4751,21 @@
 2026-05-02 06:01:39,266 [INFO] TRY calculated: 178500.00 / 45.0000 = 3966.67 -> Buy: 3870, Sell: 3970
 2026-05-02 06:01:39,266 [INFO] cycle Tehran=09:31 changed=False silent=30.8min -> skip (no_change_within_silence_window)
 2026-05-02 06:01:39,267 [INFO] cycle result: {'action': 'skip', 'detail': 'no_change_within_silence_window'}
+2026-05-02 06:33:13,623 [INFO] sulaymaniyah sell post: 177400 from: سلێمانی فردایی
+💰
+177,400 فروش
+🔴
+2026-05-02 06:33:13,623 [INFO] sulaymaniyah USD: market=177400 sell=178500 buy=176500
+2026-05-02 06:33:14,203 [INFO] pi_jt EUR sell post found: 203000 from: یورو تـهران فردایی
+💸
+:
+🔵
+203,000 خریـــدار
+🔴
+204,000 فروشنده
+2026-05-02 06:33:14,203 [INFO] pi_jt EUR final (sell-only): buy=202000 sell=203000 (spread enforced)
+2026-05-02 06:33:14,203 [INFO] Prices fetched: USD buy=176500 sell=178500 (src=dollar_sulaymaniyah) | EUR buy=202000 sell=203000 (src=pi_jt)
+2026-05-02 06:33:14,736 [INFO] Wise TRY rates: USD/TRY=45.1720 EUR/TRY=52.9461
+2026-05-02 06:33:14,737 [INFO] TRY calculated: 178500.00 / 45.0000 = 3966.67 -> Buy: 3870, Sell: 3970
+2026-05-02 06:33:14,738 [INFO] cycle Tehran=10:03 changed=False silent=62.4min -> post (silence_limit)
+2026-05-02 06:33:15,359 [INFO] cycle result: {'action': 'posted', 'detail': 'silence_limit'}
