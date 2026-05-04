@@ -5112,3 +5112,24 @@
 2026-05-03 20:27:59,445 [INFO] cycle result: {'action': 'posted', 'detail': 'silence_limit'}
 2026-05-03 22:26:02,797 [INFO] outside working hours (Tehran 01:56); sleeping
 2026-05-03 22:26:02,797 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
+2026-05-04 08:20:09,342 [INFO] sulaymaniyah USD not found, trying pi_jt
+2026-05-04 08:20:09,704 [INFO] pi_jt USD sell post found: 188500 from: دلار فردایی تهران
+⏳
+188,500 فروش
+🔴
+2026-05-04 08:20:09,705 [INFO] pi_jt USD final (sell-only): buy=187500 sell=188500 (spread enforced)
+2026-05-04 08:20:09,705 [INFO] pi_jt EUR not found, trying fallback sources
+2026-05-04 08:20:10,175 [INFO] EUR fallback (sell pattern): 219260 from 💵
+دلار آمریکا فروش
+🔴
+: 187,000 تومان
+💵
+دلار آمریکا خرید
+🔵
+: 
+2026-05-04 08:20:10,175 [INFO] EUR fallback computed: mid=219260 buy=218800 sell=219800
+2026-05-04 08:20:10,175 [INFO] Prices fetched: USD buy=187500 sell=188500 (src=pi_jt) | EUR buy=218800 sell=219800 (src=navasanchannel)
+2026-05-04 08:20:10,579 [INFO] Wise TRY rates: USD/TRY=45.1877 EUR/TRY=52.9351
+2026-05-04 08:20:10,580 [INFO] TRY calculated: 188500.00 / 45.0000 = 4188.89 -> Buy: 4090, Sell: 4190
+2026-05-04 08:20:10,581 [INFO] cycle Tehran=11:50 changed=True silent=712.2min -> post (change)
+2026-05-04 08:20:10,957 [INFO] cycle result: {'action': 'posted', 'detail': 'change'}
