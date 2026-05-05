@@ -5373,3 +5373,5 @@
 2026-05-05 17:07:22,666 [INFO] cycle result: {'action': 'posted', 'detail': 'change'}
 2026-05-05 20:47:34,633 [INFO] outside working hours (Tehran 00:17); sleeping
 2026-05-05 20:47:34,633 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
+2026-05-05 23:35:38,898 [INFO] outside working hours (Tehran 03:05); sleeping
+2026-05-05 23:35:38,899 [INFO] cycle result: {'action': 'idle', 'detail': 'outside_working_hours'}
