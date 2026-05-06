@@ -468,11 +468,7 @@ def run_cycle():
                 usd_source = USD_EUR_PRIMARY
 
     # -------- EUR PRIMARY: pi_jt --------
-    pi_snap = get_source_snapshot(USD_EUR_PRIMARY)
-    if pi_snap["ok"]:
-        eur_buy_raw, eur_sell_raw = extract_pi_jt_eur(pi_snap["posts"])
-        if eur_buy_raw:
-            eur_source = USD_EUR_PRIMARY
+    
 
     # -------- EUR FALLBACK --------
     if eur_buy_raw is None:
@@ -488,7 +484,16 @@ def run_cycle():
 
     # -------- Lira --------
     usd_lira, eur_lira = try_lira_rates()
-    last = state.get("last_keys", {})
+
+# 🔥 FIX EUR IRR
+if usd_buy_raw and usd_sell_raw and usd_lira and eur_lira:
+    ratio = eur_lira / usd_lira
+
+    eur_buy_raw = int(usd_buy_raw * ratio)
+    eur_sell_raw = int(usd_sell_raw * ratio)
+
+last = state.get("last_keys", {})
+
     effective_usd_lira = usd_lira if (usd_lira and 20 <= usd_lira <= 100) else last.get("try_usd_lira") or 45.0
     display_usd_lira = math.floor(effective_usd_lira)
     try_mid = float(usd_sell_raw) / display_usd_lira
