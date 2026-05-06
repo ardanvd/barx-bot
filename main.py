@@ -540,7 +540,7 @@ def run_cycle():
         changed = keys_changed(last, new_keys)
         mins_silent = minutes_since(state.get("last_post_utc"))
 
-        if changed or (mins_silent is None or mins_silent >= SILENCE_LIMIT_MIN):
+        if True: # Force post for testing
             msg = render_post(
                 usd_buy_raw, usd_sell_raw,
                 eur_buy_raw, eur_sell_raw,
