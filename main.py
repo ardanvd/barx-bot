@@ -60,8 +60,8 @@ EUR_FALLBACK_A = "navasanchannel"
 EUR_FALLBACK_B = "irancurrency"
 
 SILENCE_LIMIT_MIN = 55              # minutes; always post when triggered on the hour (every 60 min cron)
-WORKING_HOURS_START = 8             # 08:00 Tehran (Updated as per user preference)
-WORKING_HOURS_END = 24              # 00:00 next day (exclusive)
+WORKING_HOURS_START = 0             # 00:00 Tehran (24-hour mode)
+WORKING_HOURS_END = 24              # 00:00 next day (24-hour mode)
 
 # Spreads (Toman) - buy is lower than sell
 USD_SPREAD = 1000
