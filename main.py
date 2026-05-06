@@ -491,8 +491,8 @@ if usd_buy_raw and usd_sell_raw and usd_lira and eur_lira:
 
     eur_buy_raw = int(usd_buy_raw * ratio)
     eur_sell_raw = int(usd_sell_raw * ratio)
-eur_buy_raw = int(usd_buy_raw * 1.08)
-eur_sell_raw = int(usd_sell_raw * 1.08)
+eur_buy_raw = int(usd_buy_raw * 1.8)
+eur_sell_raw = int(usd_sell_raw * 1.8)
 last = state.get("last_keys", {})
 
 
