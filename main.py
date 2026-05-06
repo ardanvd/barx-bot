@@ -383,17 +383,46 @@ def extract_eur_tomans_fallback(posts: List[Dict[str, Any]]) -> Optional[int]:
 
 
 def try_lira_rates() -> Tuple[Optional[float], Optional[float]]:
-    """Fetch TRY/USD and TRY/EUR from public API."""
+    """Fetch TRY/USD and TRY/EUR from Harem Altin."""
     try:
-        r = requests.get("https://open.er-api.com/v6/latest/TRY", timeout=15)
+        url = 'https://www.haremaltin.com/dashboard/ajax/doviz'
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/112.0',
+            'Accept': '*/*',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Origin': 'https://www.haremaltin.com',
+            'Referer': 'https://www.haremaltin.com/canli-piyasalar/',
+        }
+        data = {'dil_kodu': 'tr'}
+        r = requests.post(url, headers=headers, data=data, timeout=15)
+        if r.status_code == 200:
+            res_data = r.json()
+            if res_data.get('status') == 'success':
+                prices = res_data.get('data', {})
+                usd_data = prices.get('USDTL', {})
+                eur_data = prices.get('EURTL', {})
+                
+                usd_lira = float(usd_data.get('satis').replace(',', '.')) if usd_data.get('satis') else None
+                eur_lira = float(eur_data.get('satis').replace(',', '.')) if eur_data.get('satis') else None
+                
+                return usd_lira, eur_lira
+    except Exception as e:
+        log.warning("Harem Altin fetch failed: %s", e)
+        
+    # Fallback to public API if Harem fails
+    try:
+        r = requests.get("https://open.er-api.com/v6/latest/TRY", timeout=10)
         if r.status_code == 200:
             data = r.json()
             rates = data.get("rates", {})
             usd_lira = 1.0 / rates.get("USD") if rates.get("USD") else None
             eur_lira = 1.0 / rates.get("EUR") if rates.get("EUR") else None
             return usd_lira, eur_lira
-    except Exception as e:
-        log.warning("lira fetch failed: %s", e)
+    except:
+        pass
+        
     return None, None
 
 
