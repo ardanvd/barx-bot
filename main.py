@@ -485,51 +485,52 @@ def run_cycle():
     # -------- Lira --------
     usd_lira, eur_lira = try_lira_rates()
 
-# 🔥 FIX EUR IRR
-if usd_buy_raw and usd_sell_raw and usd_lira and eur_lira:
-    ratio = eur_lira / usd_lira
+    # 🔥 FIX EUR IRR
+    if usd_buy_raw and usd_sell_raw and usd_lira and eur_lira:
+        ratio = eur_lira / usd_lira
 
-    eur_buy_raw = int(usd_buy_raw * ratio)
-    eur_sell_raw = int(usd_sell_raw * ratio)
-eur_buy_raw = int(usd_buy_raw * 1.8)
-eur_sell_raw = int(usd_sell_raw * 1.8)
-last = state.get("last_keys", {})
+        eur_buy_raw = int(usd_buy_raw * ratio)
+        eur_sell_raw = int(usd_sell_raw * ratio)
+        eur_buy_raw = int(usd_buy_raw * 1.8)
+        eur_sell_raw = int(usd_sell_raw * 1.8)
+        last = state.get("last_keys", {})
 
+        effective_usd_lira = usd_lira if (usd_lira and 20 <= usd_lira <= 100) else last.get("try_usd_lira") or 45.0
+        display_usd_lira = math.floor(effective_usd_lira)
+        try_mid = float(usd_sell_raw) / display_usd_lira
+        try_buy, try_sell = spread(try_mid, TRY_SPREAD, step=10)
 
-    effective_usd_lira = usd_lira if (usd_lira and 20 <= usd_lira <= 100) else last.get("try_usd_lira") or 45.0
-    display_usd_lira = math.floor(effective_usd_lira)
-    try_mid = float(usd_sell_raw) / display_usd_lira
-    try_buy, try_sell = spread(try_mid, TRY_SPREAD, step=10)
+        new_keys = {
+            "usd_buy": usd_buy_raw, "usd_sell": usd_sell_raw,
+            "eur_buy": eur_buy_raw, "eur_sell": eur_sell_raw,
+            "try_buy": try_buy, "try_sell": try_sell,
+            "try_usd_lira": display_usd_lira,
+            "try_eur_lira": round(eur_lira, 4) if eur_lira else last.get("try_eur_lira") or 52.0,
+        }
 
-    new_keys = {
-        "usd_buy": usd_buy_raw, "usd_sell": usd_sell_raw,
-        "eur_buy": eur_buy_raw, "eur_sell": eur_sell_raw,
-        "try_buy": try_buy, "try_sell": try_sell,
-        "try_usd_lira": display_usd_lira,
-        "try_eur_lira": round(eur_lira, 4) if eur_lira else last.get("try_eur_lira") or 52.0,
-    }
+        changed = keys_changed(last, new_keys)
+        mins_silent = minutes_since(state.get("last_post_utc"))
 
-    changed = keys_changed(last, new_keys)
-    mins_silent = minutes_since(state.get("last_post_utc"))
-
-    if changed or (mins_silent is None or mins_silent >= SILENCE_LIMIT_MIN):
-        msg = render_post(
-            usd_buy_raw, usd_sell_raw,
-            eur_buy_raw, eur_sell_raw,
-            try_buy, try_sell,
-            new_keys["try_usd_lira"], new_keys["try_eur_lira"],
-        )
-        resp = tg_send_message(msg)
-        if resp.get("ok"):
-            state["last_keys"] = new_keys
-            state["last_post_utc"] = t_utc.isoformat()
-            save_state(state)
-            return {"action": "posted", "detail": "change" if changed else "silence"}
-        else:
-            log.error("TG send failed: %s", resp)
-            return {"action": "error", "detail": "tg_fail"}
+        if changed or (mins_silent is None or mins_silent >= SILENCE_LIMIT_MIN):
+            msg = render_post(
+                usd_buy_raw, usd_sell_raw,
+                eur_buy_raw, eur_sell_raw,
+                try_buy, try_sell,
+                new_keys["try_usd_lira"], new_keys["try_eur_lira"],
+            )
+            resp = tg_send_message(msg)
+            if resp.get("ok"):
+                state["last_keys"] = new_keys
+                state["last_post_utc"] = t_utc.isoformat()
+                save_state(state)
+                return {"action": "posted", "detail": "change" if changed else "silence"}
+            else:
+                log.error("TG send failed: %s", resp)
+                return {"action": "error", "detail": "tg_fail"}
+        
+        return {"action": "skip", "detail": "no_change"}
     
-    return {"action": "skip", "detail": "no_change"}
+    return {"action": "skip", "detail": "no_data_for_lira_fix"}
 
 def main():
     if not BOT_TOKEN:
