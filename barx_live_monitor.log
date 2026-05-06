@@ -5387,3 +5387,6 @@
 2026-05-06 12:17:28,702 [INFO] Cycle start: Tehran=2026-05-06 15:47:28.702348+03:30 UTC=2026-05-06 12:17:28.702338+00:00
 2026-05-06 12:17:29,176 [INFO] USD from Sulaymaniyah: mid=175500 -> buy=174600 sell=176600
 2026-05-06 12:17:30,594 [INFO] Cycle result: {'action': 'posted', 'detail': 'change'}
+2026-05-06 12:25:30,811 [INFO] Cycle start: Tehran=2026-05-06 15:55:30.811840+03:30 UTC=2026-05-06 12:25:30.811830+00:00
+2026-05-06 12:25:31,197 [INFO] USD from Sulaymaniyah: mid=175500 -> buy=174600 sell=176600
+2026-05-06 12:25:32,058 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
