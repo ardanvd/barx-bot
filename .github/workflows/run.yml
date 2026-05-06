@@ -2,7 +2,7 @@ name: Barx Bot
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/30 6-21 * * *'
   workflow_dispatch:
 
 jobs:

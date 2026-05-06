@@ -565,13 +565,27 @@ def main():
     if not BOT_TOKEN:
         log.error("TELEGRAM_BOT_TOKEN missing")
         return 2
-    try:
-        res = run_cycle()
-        log.info("Cycle result: %s", res)
-        return 0
-    except Exception as e:
-        log.exception("Fatal: %s", e)
-        return 1
+    
+    # Run multiple cycles with short delays to catch price changes faster
+    # GitHub Actions usually allows up to 6 hours of runtime, we'll run for ~25 mins
+    import time
+    start_time = time.time()
+    max_duration = 25 * 60 # 25 minutes
+    
+    log.info("Starting multi-cycle run (25 mins)")
+    
+    while (time.time() - start_time) < max_duration:
+        try:
+            res = run_cycle()
+            log.info("Cycle result: %s", res)
+        except Exception as e:
+            log.exception("Cycle error: %s", e)
+        
+        # Wait 2 minutes before next check
+        log.info("Waiting 2 minutes for next check...")
+        time.sleep(120)
+        
+    return 0
 
 if __name__ == "__main__":
     import sys
