@@ -59,7 +59,7 @@ USD_WEIGHT_B = 0.25
 EUR_FALLBACK_A = "navasanchannel"
 EUR_FALLBACK_B = "irancurrency"
 
-SILENCE_LIMIT_MIN = 55              # minutes; always post when triggered on the hour (every 60 min cron)
+SILENCE_LIMIT_MIN = 999999          # effectively disable periodic posting, only post on change
 WORKING_HOURS_START = 0             # 00:00 Tehran (24-hour mode)
 WORKING_HOURS_END = 24              # 00:00 next day (24-hour mode)
 
