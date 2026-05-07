@@ -529,15 +529,15 @@ def run_cycle():
         last = state.get("last_keys", {})
 
         effective_usd_lira = usd_lira if (usd_lira and 20 <= usd_lira <= 100) else last.get("try_usd_lira") or 45.0
-        display_usd_lira = math.floor(effective_usd_lira)
-        try_mid = float(usd_sell_raw) / display_usd_lira
+        # Use exact rate for calculation, no floor rounding
+        try_mid = float(usd_sell_raw) / effective_usd_lira
         try_buy, try_sell = spread(try_mid, TRY_SPREAD, step=10)
 
         new_keys = {
             "usd_buy": usd_buy_raw, "usd_sell": usd_sell_raw,
             "eur_buy": eur_buy_raw, "eur_sell": eur_sell_raw,
             "try_buy": try_buy, "try_sell": try_sell,
-            "try_usd_lira": display_usd_lira,
+            "try_usd_lira": round(effective_usd_lira, 4),
             "try_eur_lira": round(eur_lira, 4) if eur_lira else last.get("try_eur_lira") or 52.0,
         }
 
