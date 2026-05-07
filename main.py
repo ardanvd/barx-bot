@@ -540,7 +540,7 @@ def run_cycle():
         changed = keys_changed(last, new_keys)
         mins_silent = minutes_since(state.get("last_post_utc"))
 
-        if changed: # Only post if price changed
+        if True: # Force post for testing
             msg = render_post(
                 usd_buy_raw, usd_sell_raw,
                 eur_buy_raw, eur_sell_raw,
