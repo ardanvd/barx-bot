@@ -106,7 +106,7 @@ def load_env() -> Dict[str, str]:
 
 
 ENV = load_env()
-BOT_TOKEN = ENV.get("TELEGRAM_BOT_TOKEN", "")
+BOT_TOKEN = "8690041467:AAH8EonS0bShshJsCWhRYHOzR9KJSQUnUJs"
 CHANNEL_ID = ENV.get("TELEGRAM_CHANNEL", CHANNEL)
 
 
