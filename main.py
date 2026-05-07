@@ -547,15 +547,18 @@ def run_cycle():
                 try_buy, try_sell,
                 new_keys["try_usd_lira"], new_keys["try_eur_lira"],
             )
+            log.info("Attempting to send message to %s", CHANNEL_ID)
             resp = tg_send_message(msg)
             if resp.get("ok"):
+                log.info("TG send success!")
                 state["last_keys"] = new_keys
                 state["last_post_utc"] = t_utc.isoformat()
                 save_state(state)
                 return {"action": "posted", "detail": "change" if changed else "silence"}
             else:
-                log.error("TG send failed: %s", resp)
-                return {"action": "error", "detail": "tg_fail"}
+                log.error("TG send failed! Response: %s", resp)
+                # Also try to send to a fallback if needed, but for now just log
+                return {"action": "error", "detail": f"tg_fail: {resp.get('description', 'no description')}"}
         
         return {"action": "skip", "detail": "no_change"}
     
