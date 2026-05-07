@@ -577,7 +577,7 @@ def main():
     # GitHub Actions usually allows up to 6 hours of runtime, we'll run for ~25 mins
     import time
     start_time = time.time()
-    max_duration = 25 * 60 # 25 minutes
+    max_duration = 55 * 60 # 55 minutes to ensure continuous coverage
     
     log.info("Starting multi-cycle run (25 mins)")
     
