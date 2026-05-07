@@ -43,8 +43,8 @@ ORDER_CONTACT = "@barx_exchangee"
 
 # Primary source: dollar_sulaymaniyah (Sulaymaniyah market price)
 USD_PRIMARY = "dollar_sulaymaniyah"
-USD_SULAYMANIYAH_MARKUP = 1100   # 800 transport + 300 profit
-USD_SULAYMANIYAH_SPREAD = 2000   # buy = sell - 2000
+USD_SULAYMANIYAH_MARKUP = 1100   # Add 1100 to Sulaymaniyah price
+USD_SULAYMANIYAH_SPREAD = 1000   # Standard spread (buy = sell - 1000)
 
 # Secondary source: pi_jt (Tehran forward dollar & euro)
 USD_EUR_PRIMARY = "pi_jt"
@@ -522,6 +522,10 @@ def run_cycle():
         eur_sell_raw = int(usd_sell_raw * ratio)
         eur_buy_raw = int(usd_buy_raw * 1.175)
         eur_sell_raw = int(usd_sell_raw * 1.175)
+        
+        # Round to nearest 100 for cleaner display
+        eur_buy_raw = int(round(eur_buy_raw / 100) * 100)
+        eur_sell_raw = int(round(eur_sell_raw / 100) * 100)
         last = state.get("last_keys", {})
 
         effective_usd_lira = usd_lira if (usd_lira and 20 <= usd_lira <= 100) else last.get("try_usd_lira") or 45.0
