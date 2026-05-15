@@ -1,12 +1,12 @@
 {
-  "last_post_utc": "2026-05-15T12:22:59.546965+00:00",
+  "last_post_utc": "2026-05-15T18:11:04.026909+00:00",
   "last_keys": {
-    "usd_buy": 179400,
-    "usd_sell": 180400,
-    "eur_buy": 210800,
-    "eur_sell": 212000,
-    "try_buy": 3870,
-    "try_sell": 3970,
+    "usd_buy": 180100,
+    "usd_sell": 181100,
+    "eur_buy": 211600,
+    "eur_sell": 212800,
+    "try_buy": 3890,
+    "try_sell": 3990,
     "try_usd_lira": 45.5021,
     "try_eur_lira": 53.1519
   },
