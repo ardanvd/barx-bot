@@ -12907,3 +12907,116 @@
 2026-05-23 17:59:37,178 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
 2026-05-23 17:59:37,806 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
 2026-05-23 17:59:37,806 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:32:36,053 [INFO] Starting multi-cycle run (25 mins)
+2026-05-23 18:32:36,054 [INFO] Cycle start: Tehran=2026-05-23 22:02:36.054152+03:30 UTC=2026-05-23 18:32:36.054143+00:00
+2026-05-23 18:32:36,691 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:32:37,715 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:32:37,715 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:34:37,716 [INFO] Cycle start: Tehran=2026-05-23 22:04:37.716094+03:30 UTC=2026-05-23 18:34:37.716085+00:00
+2026-05-23 18:34:38,296 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:34:39,119 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:34:39,119 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:36:39,120 [INFO] Cycle start: Tehran=2026-05-23 22:06:39.119973+03:30 UTC=2026-05-23 18:36:39.119961+00:00
+2026-05-23 18:36:39,703 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:36:40,503 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:36:40,503 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:38:40,503 [INFO] Cycle start: Tehran=2026-05-23 22:08:40.503934+03:30 UTC=2026-05-23 18:38:40.503926+00:00
+2026-05-23 18:38:41,067 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:38:41,977 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:38:41,977 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:40:41,977 [INFO] Cycle start: Tehran=2026-05-23 22:10:41.977888+03:30 UTC=2026-05-23 18:40:41.977880+00:00
+2026-05-23 18:40:42,594 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:40:43,478 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:40:43,478 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:42:43,478 [INFO] Cycle start: Tehran=2026-05-23 22:12:43.478657+03:30 UTC=2026-05-23 18:42:43.478649+00:00
+2026-05-23 18:42:44,061 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:42:44,844 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:42:44,844 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:44:44,845 [INFO] Cycle start: Tehran=2026-05-23 22:14:44.845179+03:30 UTC=2026-05-23 18:44:44.845171+00:00
+2026-05-23 18:44:45,487 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:44:46,361 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:44:46,361 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:46:46,361 [INFO] Cycle start: Tehran=2026-05-23 22:16:46.361575+03:30 UTC=2026-05-23 18:46:46.361567+00:00
+2026-05-23 18:46:46,954 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:46:47,736 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:46:47,737 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:48:47,737 [INFO] Cycle start: Tehran=2026-05-23 22:18:47.737471+03:30 UTC=2026-05-23 18:48:47.737462+00:00
+2026-05-23 18:48:48,361 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:48:49,141 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:48:49,141 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:50:49,141 [INFO] Cycle start: Tehran=2026-05-23 22:20:49.141698+03:30 UTC=2026-05-23 18:50:49.141690+00:00
+2026-05-23 18:50:49,700 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:50:50,592 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:50:50,592 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:52:50,592 [INFO] Cycle start: Tehran=2026-05-23 22:22:50.592720+03:30 UTC=2026-05-23 18:52:50.592713+00:00
+2026-05-23 18:52:51,204 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:52:52,014 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:52:52,014 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:54:52,014 [INFO] Cycle start: Tehran=2026-05-23 22:24:52.014538+03:30 UTC=2026-05-23 18:54:52.014530+00:00
+2026-05-23 18:54:52,582 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:54:53,412 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:54:53,412 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:56:53,412 [INFO] Cycle start: Tehran=2026-05-23 22:26:53.412821+03:30 UTC=2026-05-23 18:56:53.412814+00:00
+2026-05-23 18:56:54,029 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:56:54,926 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:56:54,927 [INFO] Waiting 2 minutes for next check...
+2026-05-23 18:58:54,927 [INFO] Cycle start: Tehran=2026-05-23 22:28:54.927169+03:30 UTC=2026-05-23 18:58:54.927162+00:00
+2026-05-23 18:58:55,489 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 18:58:56,311 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 18:58:56,312 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:00:56,312 [INFO] Cycle start: Tehran=2026-05-23 22:30:56.312452+03:30 UTC=2026-05-23 19:00:56.312444+00:00
+2026-05-23 19:00:56,933 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:00:57,681 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:00:57,681 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:02:57,681 [INFO] Cycle start: Tehran=2026-05-23 22:32:57.681803+03:30 UTC=2026-05-23 19:02:57.681795+00:00
+2026-05-23 19:02:58,254 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:02:59,142 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:02:59,142 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:04:59,143 [INFO] Cycle start: Tehran=2026-05-23 22:34:59.143276+03:30 UTC=2026-05-23 19:04:59.143265+00:00
+2026-05-23 19:04:59,760 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:05:00,546 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:05:00,547 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:07:00,547 [INFO] Cycle start: Tehran=2026-05-23 22:37:00.547256+03:30 UTC=2026-05-23 19:07:00.547248+00:00
+2026-05-23 19:07:01,145 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:07:02,031 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:07:02,031 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:09:02,031 [INFO] Cycle start: Tehran=2026-05-23 22:39:02.031749+03:30 UTC=2026-05-23 19:09:02.031742+00:00
+2026-05-23 19:09:02,621 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:09:03,523 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:09:03,523 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:11:03,524 [INFO] Cycle start: Tehran=2026-05-23 22:41:03.523989+03:30 UTC=2026-05-23 19:11:03.523982+00:00
+2026-05-23 19:11:04,144 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:11:04,917 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:11:04,917 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:13:04,918 [INFO] Cycle start: Tehran=2026-05-23 22:43:04.918021+03:30 UTC=2026-05-23 19:13:04.918013+00:00
+2026-05-23 19:13:05,508 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:13:06,289 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:13:06,290 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:15:06,290 [INFO] Cycle start: Tehran=2026-05-23 22:45:06.290239+03:30 UTC=2026-05-23 19:15:06.290230+00:00
+2026-05-23 19:15:06,865 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:15:07,830 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:15:07,830 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:17:07,830 [INFO] Cycle start: Tehran=2026-05-23 22:47:07.830767+03:30 UTC=2026-05-23 19:17:07.830759+00:00
+2026-05-23 19:17:08,420 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:17:09,197 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:17:09,197 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:19:09,198 [INFO] Cycle start: Tehran=2026-05-23 22:49:09.198093+03:30 UTC=2026-05-23 19:19:09.198085+00:00
+2026-05-23 19:19:09,845 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:19:10,735 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:19:10,735 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:21:10,735 [INFO] Cycle start: Tehran=2026-05-23 22:51:10.735706+03:30 UTC=2026-05-23 19:21:10.735697+00:00
+2026-05-23 19:21:11,365 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:21:12,248 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:21:12,248 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:23:12,248 [INFO] Cycle start: Tehran=2026-05-23 22:53:12.248567+03:30 UTC=2026-05-23 19:23:12.248559+00:00
+2026-05-23 19:23:12,822 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:23:13,635 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:23:13,635 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:25:13,635 [INFO] Cycle start: Tehran=2026-05-23 22:55:13.635837+03:30 UTC=2026-05-23 19:25:13.635829+00:00
+2026-05-23 19:25:14,271 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:25:15,221 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:25:15,221 [INFO] Waiting 2 minutes for next check...
+2026-05-23 19:27:15,221 [INFO] Cycle start: Tehran=2026-05-23 22:57:15.221721+03:30 UTC=2026-05-23 19:27:15.221713+00:00
+2026-05-23 19:27:15,799 [INFO] USD from Sulaymaniyah: mid=176300 -> buy=176400 sell=177400
+2026-05-23 19:27:16,662 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_change'}
+2026-05-23 19:27:16,662 [INFO] Waiting 2 minutes for next check...
