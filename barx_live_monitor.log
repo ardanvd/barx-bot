@@ -17429,3 +17429,116 @@
 2026-05-29 22:18:08,536 [WARNING] No fresh price available; skipping
 2026-05-29 22:18:08,536 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
 2026-05-29 22:18:08,536 [INFO] Waiting 2 minutes for next check...
+2026-05-29 22:48:28,591 [INFO] Starting multi-cycle run (25 mins)
+2026-05-29 22:48:28,591 [INFO] Cycle start: Tehran=2026-05-30 02:18:28.591623+03:30 UTC=2026-05-29 22:48:28.591616+00:00
+2026-05-29 22:48:29,815 [WARNING] No fresh price available; skipping
+2026-05-29 22:48:29,815 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 22:48:29,815 [INFO] Waiting 2 minutes for next check...
+2026-05-29 22:50:29,815 [INFO] Cycle start: Tehran=2026-05-30 02:20:29.815754+03:30 UTC=2026-05-29 22:50:29.815745+00:00
+2026-05-29 22:50:31,032 [WARNING] No fresh price available; skipping
+2026-05-29 22:50:31,033 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 22:50:31,033 [INFO] Waiting 2 minutes for next check...
+2026-05-29 22:52:31,033 [INFO] Cycle start: Tehran=2026-05-30 02:22:31.033664+03:30 UTC=2026-05-29 22:52:31.033655+00:00
+2026-05-29 22:52:32,379 [WARNING] No fresh price available; skipping
+2026-05-29 22:52:32,379 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 22:52:32,379 [INFO] Waiting 2 minutes for next check...
+2026-05-29 22:54:32,380 [INFO] Cycle start: Tehran=2026-05-30 02:24:32.380107+03:30 UTC=2026-05-29 22:54:32.380093+00:00
+2026-05-29 22:54:33,591 [WARNING] No fresh price available; skipping
+2026-05-29 22:54:33,591 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 22:54:33,591 [INFO] Waiting 2 minutes for next check...
+2026-05-29 22:56:33,591 [INFO] Cycle start: Tehran=2026-05-30 02:26:33.591502+03:30 UTC=2026-05-29 22:56:33.591494+00:00
+2026-05-29 22:56:34,913 [WARNING] No fresh price available; skipping
+2026-05-29 22:56:34,913 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 22:56:34,913 [INFO] Waiting 2 minutes for next check...
+2026-05-29 22:58:34,914 [INFO] Cycle start: Tehran=2026-05-30 02:28:34.914101+03:30 UTC=2026-05-29 22:58:34.914053+00:00
+2026-05-29 22:58:36,183 [WARNING] No fresh price available; skipping
+2026-05-29 22:58:36,183 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 22:58:36,183 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:00:36,183 [INFO] Cycle start: Tehran=2026-05-30 02:30:36.183451+03:30 UTC=2026-05-29 23:00:36.183442+00:00
+2026-05-29 23:00:37,521 [WARNING] No fresh price available; skipping
+2026-05-29 23:00:37,522 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:00:37,522 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:02:37,522 [INFO] Cycle start: Tehran=2026-05-30 02:32:37.522367+03:30 UTC=2026-05-29 23:02:37.522358+00:00
+2026-05-29 23:02:38,748 [WARNING] No fresh price available; skipping
+2026-05-29 23:02:38,748 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:02:38,748 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:04:38,748 [INFO] Cycle start: Tehran=2026-05-30 02:34:38.748856+03:30 UTC=2026-05-29 23:04:38.748848+00:00
+2026-05-29 23:04:39,983 [WARNING] No fresh price available; skipping
+2026-05-29 23:04:39,984 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:04:39,984 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:06:39,984 [INFO] Cycle start: Tehran=2026-05-30 02:36:39.984319+03:30 UTC=2026-05-29 23:06:39.984311+00:00
+2026-05-29 23:06:41,228 [WARNING] No fresh price available; skipping
+2026-05-29 23:06:41,228 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:06:41,228 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:08:41,228 [INFO] Cycle start: Tehran=2026-05-30 02:38:41.228882+03:30 UTC=2026-05-29 23:08:41.228874+00:00
+2026-05-29 23:08:42,508 [WARNING] No fresh price available; skipping
+2026-05-29 23:08:42,508 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:08:42,508 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:10:42,508 [INFO] Cycle start: Tehran=2026-05-30 02:40:42.508770+03:30 UTC=2026-05-29 23:10:42.508762+00:00
+2026-05-29 23:10:43,715 [WARNING] No fresh price available; skipping
+2026-05-29 23:10:43,715 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:10:43,715 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:12:43,715 [INFO] Cycle start: Tehran=2026-05-30 02:42:43.715681+03:30 UTC=2026-05-29 23:12:43.715673+00:00
+2026-05-29 23:12:44,930 [WARNING] No fresh price available; skipping
+2026-05-29 23:12:44,930 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:12:44,930 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:14:44,930 [INFO] Cycle start: Tehran=2026-05-30 02:44:44.930711+03:30 UTC=2026-05-29 23:14:44.930702+00:00
+2026-05-29 23:14:46,248 [WARNING] No fresh price available; skipping
+2026-05-29 23:14:46,249 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:14:46,249 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:16:46,249 [INFO] Cycle start: Tehran=2026-05-30 02:46:46.249354+03:30 UTC=2026-05-29 23:16:46.249345+00:00
+2026-05-29 23:16:47,499 [WARNING] No fresh price available; skipping
+2026-05-29 23:16:47,499 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:16:47,499 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:18:47,500 [INFO] Cycle start: Tehran=2026-05-30 02:48:47.500155+03:30 UTC=2026-05-29 23:18:47.500148+00:00
+2026-05-29 23:18:48,697 [WARNING] No fresh price available; skipping
+2026-05-29 23:18:48,697 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:18:48,697 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:20:48,697 [INFO] Cycle start: Tehran=2026-05-30 02:50:48.697398+03:30 UTC=2026-05-29 23:20:48.697388+00:00
+2026-05-29 23:20:49,893 [WARNING] No fresh price available; skipping
+2026-05-29 23:20:49,893 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:20:49,893 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:22:49,893 [INFO] Cycle start: Tehran=2026-05-30 02:52:49.893723+03:30 UTC=2026-05-29 23:22:49.893714+00:00
+2026-05-29 23:22:51,109 [WARNING] No fresh price available; skipping
+2026-05-29 23:22:51,109 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:22:51,109 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:24:51,110 [INFO] Cycle start: Tehran=2026-05-30 02:54:51.110095+03:30 UTC=2026-05-29 23:24:51.110054+00:00
+2026-05-29 23:24:52,336 [WARNING] No fresh price available; skipping
+2026-05-29 23:24:52,336 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:24:52,336 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:26:52,337 [INFO] Cycle start: Tehran=2026-05-30 02:56:52.336985+03:30 UTC=2026-05-29 23:26:52.336976+00:00
+2026-05-29 23:26:53,567 [WARNING] No fresh price available; skipping
+2026-05-29 23:26:53,567 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:26:53,567 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:28:53,567 [INFO] Cycle start: Tehran=2026-05-30 02:58:53.567389+03:30 UTC=2026-05-29 23:28:53.567381+00:00
+2026-05-29 23:28:54,794 [WARNING] No fresh price available; skipping
+2026-05-29 23:28:54,794 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:28:54,794 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:30:54,794 [INFO] Cycle start: Tehran=2026-05-30 03:00:54.794596+03:30 UTC=2026-05-29 23:30:54.794587+00:00
+2026-05-29 23:30:56,202 [WARNING] No fresh price available; skipping
+2026-05-29 23:30:56,202 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:30:56,202 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:32:56,202 [INFO] Cycle start: Tehran=2026-05-30 03:02:56.202765+03:30 UTC=2026-05-29 23:32:56.202757+00:00
+2026-05-29 23:32:57,478 [WARNING] No fresh price available; skipping
+2026-05-29 23:32:57,478 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:32:57,478 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:34:57,478 [INFO] Cycle start: Tehran=2026-05-30 03:04:57.478399+03:30 UTC=2026-05-29 23:34:57.478391+00:00
+2026-05-29 23:34:58,778 [WARNING] No fresh price available; skipping
+2026-05-29 23:34:58,778 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:34:58,778 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:36:58,779 [INFO] Cycle start: Tehran=2026-05-30 03:06:58.778983+03:30 UTC=2026-05-29 23:36:58.778975+00:00
+2026-05-29 23:37:00,042 [WARNING] No fresh price available; skipping
+2026-05-29 23:37:00,042 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:37:00,042 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:39:00,042 [INFO] Cycle start: Tehran=2026-05-30 03:09:00.042745+03:30 UTC=2026-05-29 23:39:00.042736+00:00
+2026-05-29 23:39:01,274 [WARNING] No fresh price available; skipping
+2026-05-29 23:39:01,274 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:39:01,275 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:41:01,275 [INFO] Cycle start: Tehran=2026-05-30 03:11:01.275240+03:30 UTC=2026-05-29 23:41:01.275231+00:00
+2026-05-29 23:41:02,633 [WARNING] No fresh price available; skipping
+2026-05-29 23:41:02,633 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:41:02,633 [INFO] Waiting 2 minutes for next check...
+2026-05-29 23:43:02,633 [INFO] Cycle start: Tehran=2026-05-30 03:13:02.633432+03:30 UTC=2026-05-29 23:43:02.633424+00:00
+2026-05-29 23:43:03,895 [WARNING] No fresh price available; skipping
+2026-05-29 23:43:03,895 [INFO] Cycle result: {'action': 'skip', 'detail': 'no_fresh_data'}
+2026-05-29 23:43:03,895 [INFO] Waiting 2 minutes for next check...
