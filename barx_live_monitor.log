@@ -28366,3 +28366,172 @@
 2026-06-09 18:50:36,380 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
 2026-06-09 18:50:36,380 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
 2026-06-09 18:50:36,380 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:02:54,217 [INFO] Starting multi-cycle run (25 mins)
+2026-06-09 20:02:54,217 [INFO] Cycle start: Tehran=2026-06-09 23:32:54.217355+03:30 UTC=2026-06-09 20:02:54.217346+00:00
+2026-06-09 20:02:54,683 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:02:55,652 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:02:57,352 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:02:57,352 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:02:57,352 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:04:57,353 [INFO] Cycle start: Tehran=2026-06-09 23:34:57.353080+03:30 UTC=2026-06-09 20:04:57.353072+00:00
+2026-06-09 20:04:57,794 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:04:58,457 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:04:58,841 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:04:58,841 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:04:58,841 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:06:58,841 [INFO] Cycle start: Tehran=2026-06-09 23:36:58.841703+03:30 UTC=2026-06-09 20:06:58.841691+00:00
+2026-06-09 20:06:59,312 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:07:00,072 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:07:00,436 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:07:00,437 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:07:00,437 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:09:00,437 [INFO] Cycle start: Tehran=2026-06-09 23:39:00.437308+03:30 UTC=2026-06-09 20:09:00.437300+00:00
+2026-06-09 20:09:00,870 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:09:01,737 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:09:02,126 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:09:02,127 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:09:02,127 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:11:02,127 [INFO] Cycle start: Tehran=2026-06-09 23:41:02.127292+03:30 UTC=2026-06-09 20:11:02.127283+00:00
+2026-06-09 20:11:02,591 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:11:03,353 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:11:03,744 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:11:03,744 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:11:03,744 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:13:03,745 [INFO] Cycle start: Tehran=2026-06-09 23:43:03.744985+03:30 UTC=2026-06-09 20:13:03.744976+00:00
+2026-06-09 20:13:04,176 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:13:04,806 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:13:05,199 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:13:05,199 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:13:05,199 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:15:05,199 [INFO] Cycle start: Tehran=2026-06-09 23:45:05.199562+03:30 UTC=2026-06-09 20:15:05.199555+00:00
+2026-06-09 20:15:05,647 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:15:06,376 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:15:06,760 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:15:06,760 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:15:06,760 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:17:06,761 [INFO] Cycle start: Tehran=2026-06-09 23:47:06.761121+03:30 UTC=2026-06-09 20:17:06.761112+00:00
+2026-06-09 20:17:07,186 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:17:07,868 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:17:08,204 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:17:08,205 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:17:08,205 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:19:08,205 [INFO] Cycle start: Tehran=2026-06-09 23:49:08.205457+03:30 UTC=2026-06-09 20:19:08.205448+00:00
+2026-06-09 20:19:08,633 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:19:09,253 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:19:09,625 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:19:09,626 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:19:09,626 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:21:09,626 [INFO] Cycle start: Tehran=2026-06-09 23:51:09.626387+03:30 UTC=2026-06-09 20:21:09.626379+00:00
+2026-06-09 20:21:10,085 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:21:10,834 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:21:11,201 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:21:11,201 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:21:11,201 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:23:11,201 [INFO] Cycle start: Tehran=2026-06-09 23:53:11.201822+03:30 UTC=2026-06-09 20:23:11.201814+00:00
+2026-06-09 20:23:11,812 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:23:12,421 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:23:12,798 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:23:12,798 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:23:12,799 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:25:12,799 [INFO] Cycle start: Tehran=2026-06-09 23:55:12.799224+03:30 UTC=2026-06-09 20:25:12.799217+00:00
+2026-06-09 20:25:13,228 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:25:13,873 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:25:14,260 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:25:14,261 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:25:14,261 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:27:14,261 [INFO] Cycle start: Tehran=2026-06-09 23:57:14.261361+03:30 UTC=2026-06-09 20:27:14.261353+00:00
+2026-06-09 20:27:14,734 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:27:15,542 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:27:15,913 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:27:15,913 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:27:15,913 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:29:15,913 [INFO] Cycle start: Tehran=2026-06-09 23:59:15.913525+03:30 UTC=2026-06-09 20:29:15.913517+00:00
+2026-06-09 20:29:16,350 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:29:17,104 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:29:17,560 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:29:17,560 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:29:17,560 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:31:17,560 [INFO] Cycle start: Tehran=2026-06-10 00:01:17.560451+03:30 UTC=2026-06-09 20:31:17.560443+00:00
+2026-06-09 20:31:18,069 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:31:18,764 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:31:19,123 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:31:19,123 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:31:19,123 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:33:19,124 [INFO] Cycle start: Tehran=2026-06-10 00:03:19.124058+03:30 UTC=2026-06-09 20:33:19.124050+00:00
+2026-06-09 20:33:19,540 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:33:20,529 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:33:22,472 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:33:22,473 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:33:22,473 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:35:22,473 [INFO] Cycle start: Tehran=2026-06-10 00:05:22.473528+03:30 UTC=2026-06-09 20:35:22.473520+00:00
+2026-06-09 20:35:22,951 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:35:23,582 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:35:23,952 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:35:23,952 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:35:23,952 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:37:23,952 [INFO] Cycle start: Tehran=2026-06-10 00:07:23.952680+03:30 UTC=2026-06-09 20:37:23.952673+00:00
+2026-06-09 20:37:24,400 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:37:25,108 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:37:25,492 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:37:25,492 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:37:25,492 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:39:25,493 [INFO] Cycle start: Tehran=2026-06-10 00:09:25.493173+03:30 UTC=2026-06-09 20:39:25.493165+00:00
+2026-06-09 20:39:25,905 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:39:26,636 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:39:27,007 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:39:27,008 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:39:27,008 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:41:27,008 [INFO] Cycle start: Tehran=2026-06-10 00:11:27.008482+03:30 UTC=2026-06-09 20:41:27.008474+00:00
+2026-06-09 20:41:27,432 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:41:28,144 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:41:28,527 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:41:28,527 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:41:28,527 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:43:28,527 [INFO] Cycle start: Tehran=2026-06-10 00:13:28.527908+03:30 UTC=2026-06-09 20:43:28.527900+00:00
+2026-06-09 20:43:28,963 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:43:29,601 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:43:29,968 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:43:29,968 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:43:29,968 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:45:29,968 [INFO] Cycle start: Tehran=2026-06-10 00:15:29.968932+03:30 UTC=2026-06-09 20:45:29.968923+00:00
+2026-06-09 20:45:30,426 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:45:31,223 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:45:31,615 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:45:31,615 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:45:31,615 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:47:31,615 [INFO] Cycle start: Tehran=2026-06-10 00:17:31.615818+03:30 UTC=2026-06-09 20:47:31.615811+00:00
+2026-06-09 20:47:32,060 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:47:32,758 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:47:33,127 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:47:33,127 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:47:33,127 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:49:33,127 [INFO] Cycle start: Tehran=2026-06-10 00:19:33.127521+03:30 UTC=2026-06-09 20:49:33.127514+00:00
+2026-06-09 20:49:33,577 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:49:34,194 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:49:34,560 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:49:34,560 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:49:34,560 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:51:34,560 [INFO] Cycle start: Tehran=2026-06-10 00:21:34.560711+03:30 UTC=2026-06-09 20:51:34.560704+00:00
+2026-06-09 20:51:34,993 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:51:35,861 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:51:36,204 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:51:36,204 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:51:36,205 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:53:36,205 [INFO] Cycle start: Tehran=2026-06-10 00:23:36.205506+03:30 UTC=2026-06-09 20:53:36.205498+00:00
+2026-06-09 20:53:36,643 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:53:37,281 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:53:37,676 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:53:37,676 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:53:37,676 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:55:37,676 [INFO] Cycle start: Tehran=2026-06-10 00:25:37.676913+03:30 UTC=2026-06-09 20:55:37.676905+00:00
+2026-06-09 20:55:38,092 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:55:38,732 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:55:39,116 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:55:39,116 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:55:39,116 [INFO] Waiting 2 minutes for next check...
+2026-06-09 20:57:39,116 [INFO] Cycle start: Tehran=2026-06-10 00:27:39.116764+03:30 UTC=2026-06-09 20:57:39.116756+00:00
+2026-06-09 20:57:39,560 [INFO] USD from Sulaymaniyah: mid=177600 -> buy=177700 sell=178700
+2026-06-09 20:57:40,422 [INFO] Attempting to send message to @barxexchange
+2026-06-09 20:57:40,765 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
+2026-06-09 20:57:40,765 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
+2026-06-09 20:57:40,765 [INFO] Waiting 2 minutes for next check...
