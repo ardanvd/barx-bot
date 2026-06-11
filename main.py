@@ -21,18 +21,13 @@ CHANNEL = "@barxexchange"
 ORDER_CONTACT = "@barx_exchangee"
 
 USD_PRIMARY = "dollar_sulaymaniyah"
-USD_SULAYMANIYAH_MARKUP = 1100
-USD_SULAYMANIYAH_SPREAD = 2000
-USD_EUR_PRIMARY = "pi_jt"
-EUR_FALLBACK_A = "navasanchannel"
-
-SILENCE_LIMIT_MIN = 55
-WORKING_HOURS_START = 8
-WORKING_HOURS_END = 24
-
-USD_SPREAD = 1000
+USD_SULAYMANIYAH_MARKUP = 500  # User requested: 500 more than Sulaymaniyah
+USD_SULAYMANIYAH_SPREAD = 1000 # Standard spread
 EUR_SPREAD = 1000
 TRY_SPREAD = 100
+
+WORKING_HOURS_START = 8
+WORKING_HOURS_END = 24
 
 TEHRAN_TZ = dt.timezone(dt.timedelta(hours=3, minutes=30))
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -87,11 +82,10 @@ def fetch_channel_posts(username):
     try:
         r = requests.get(f"https://t.me/s/{username}", headers={"User-Agent": USER_AGENT}, timeout=20)
         soup = BeautifulSoup(r.text, "html.parser")
-        msgs = soup.select(".tgme_widget_message_wrap")
+        msgs = soup.select(".tgme_widget_message_text")
         out = []
         for m in msgs[-10:]:
-            text_el = m.select_one(".tgme_widget_message_text")
-            out.append(text_el.get_text() if text_el else "")
+            out.append(m.get_text())
         return out
     except: return []
 
@@ -109,7 +103,7 @@ def get_lira_usd_rate():
         return float(r.json().get("value", 32.5))
     except: return 32.5
 
-def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell):
+def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, lira_rate):
     now = now_tehran()
     return f"""
 💎 <b>نرخ لحظه‌ای ارز بارکس</b>
@@ -126,6 +120,8 @@ def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell):
 🇹🇷 <b>لیر ترکیه</b>
 فروش: {try_sell:,}
 خرید: {try_buy:,}
+
+📊 <b>ریت ترکیه:</b> {lira_rate:.2f}
 
 ------------------------
 📥 ثبت سفارش و مشاوره آنلاین:
@@ -145,14 +141,15 @@ def run_cycle():
     suly_mid = extract_price(suly_posts, 100000, 300000)
     if not suly_mid: return "no_price"
     
+    # User requested: 500 more than Sulaymaniyah
     usd_sell = suly_mid + USD_SULAYMANIYAH_MARKUP
     usd_buy = usd_sell - USD_SULAYMANIYAH_SPREAD
     
-    # EUR (USD * 1.08 approx)
+    # EUR (USD * 1.085 approx)
     eur_sell = int(round((usd_sell * 1.085) / 100) * 100)
     eur_buy = eur_sell - EUR_SPREAD
     
-    # Lira (USD / Rate) - Using a more realistic market rate (approx 32.8)
+    # Lira
     lira_rate = get_lira_usd_rate()
     try_mid = usd_sell / lira_rate
     try_sell = int(round(try_mid / 10) * 10)
@@ -168,7 +165,7 @@ def run_cycle():
             changed = True; break
             
     if changed:
-        msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell)
+        msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, lira_rate)
         resp = tg_send_message(msg)
         if resp.get("ok"):
             state["last_keys"] = new_keys
@@ -179,7 +176,7 @@ def run_cycle():
 
 if __name__ == "__main__":
     start_time = time.time()
-    while (time.time() - start_time) < 550: # Run for ~9 mins
+    while (time.time() - start_time) < 550:
         try: print(f"Cycle: {run_cycle()}")
         except Exception as e: print(f"Error: {e}")
         time.sleep(60)
