@@ -91,11 +91,15 @@ def fetch_channel_posts(username):
     except: return []
 
 def extract_price(posts, min_v, max_v):
+    # Improved extraction: Look for keywords like "فروش" or "معامله" to avoid summary numbers
     for txt in reversed(posts):
-        txt_norm = txt.translate(PERSIAN_DIGITS)
-        for m in NUM_RE.finditer(txt_norm):
-            val = int(m.group(0).replace(",", ""))
-            if min_v <= val <= max_v: return val
+        if any(kw in txt for kw in ["فروش", "معامله", "سلێمانی"]):
+            txt_norm = txt.translate(PERSIAN_DIGITS)
+            # Find the largest number in the message that fits the range
+            matches = [int(m.group(0).replace(",", "")) for m in NUM_RE.finditer(txt_norm)]
+            valid_matches = [v for v in matches if min_v <= v <= max_v]
+            if valid_matches:
+                return max(valid_matches)
     return None
 
 def get_live_rate(source, target):
@@ -113,7 +117,6 @@ def get_live_rate(source, target):
 
 def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate, eur_usd_rate):
     now = now_tehran()
-    # Calculate TRY rates for Turkey market section
     usd_lira = usd_try_rate
     eur_lira = usd_try_rate * eur_usd_rate
     
@@ -152,12 +155,18 @@ def run_cycle():
     last_rates = state.get("last_rates", {"eur_usd": 1.15, "usd_try": 32.5})
     
     suly_posts = fetch_channel_posts(USD_PRIMARY)
-    suly_mid = extract_price(suly_posts, 100000, 300000)
+    suly_mid = extract_price(suly_posts, 150000, 250000) # Narrowed range to avoid small numbers
     if not suly_mid: return "no_price"
     
     usd_sell = suly_mid + USD_SULAYMANIYAH_MARKUP
     usd_buy = usd_sell - USD_SULAYMANIYAH_SPREAD
     
+    # Sanity check: Don't allow more than 5000 drop from last known price
+    last_usd_sell = state.get("last_keys", {}).get("usd_sell")
+    if last_usd_sell and (last_usd_sell - usd_sell > 5000):
+        log.warning("Price drop too high (%d -> %d). Skipping.", last_usd_sell, usd_sell)
+        return "price_drop_protection"
+
     eur_usd_rate = get_live_rate("EUR", "USD") or last_rates.get("eur_usd", 1.15)
     last_rates["eur_usd"] = eur_usd_rate
     eur_sell = int(round((usd_sell * eur_usd_rate) / 100) * 100)
