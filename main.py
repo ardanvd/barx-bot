@@ -175,8 +175,8 @@ def run_cycle():
     return "skipped"
 
 if __name__ == "__main__":
-    start_time = time.time()
-    while (time.time() - start_time) < 550:
-        try: print(f"Cycle: {run_cycle()}")
-        except Exception as e: print(f"Error: {e}")
-        time.sleep(60)
+    # REMOVED THE LOOP: Now it runs exactly once per execution
+    try:
+        print(f"Cycle result: {run_cycle()}")
+    except Exception as e:
+        print(f"Error: {e}")
