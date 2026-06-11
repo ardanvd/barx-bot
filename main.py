@@ -55,6 +55,7 @@ CHANNEL_ID = ENV.get("TELEGRAM_CHANNEL")
 DEFAULT_STATE = {
     "last_post_utc": None,
     "last_keys": {"usd_buy": None, "usd_sell": None, "eur_buy": None, "eur_sell": None, "try_buy": None, "try_sell": None},
+    "last_rates": {"eur_usd": 1.15, "usd_try": 32.5}
 }
 
 def load_state():
@@ -98,10 +99,21 @@ def extract_price(posts, min_v, max_v):
     return None
 
 def get_live_rate(source, target):
+    # Try Wise
     try:
         r = requests.get(f"https://wise.com/rates/live?source={source}&target={target}", headers={"User-Agent": USER_AGENT}, timeout=10)
-        return float(r.json().get("value"))
-    except: return None
+        val = float(r.json().get("value"))
+        if val: return val
+    except: pass
+    
+    # Try ExchangeRate-API (Fallback)
+    try:
+        r = requests.get(f"https://open.er-api.com/v6/latest/{source}", timeout=10)
+        val = r.json().get("rates", {}).get(target)
+        if val: return float(val)
+    except: pass
+    
+    return None
 
 def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, lira_rate):
     now = now_tehran()
@@ -135,6 +147,7 @@ def run_cycle():
     if not (WORKING_HOURS_START <= now_t.hour < WORKING_HOURS_END): return "idle"
     
     state = load_state()
+    last_rates = state.get("last_rates", {"eur_usd": 1.15, "usd_try": 32.5})
     
     # USD from Sulaymaniyah
     suly_posts = fetch_channel_posts(USD_PRIMARY)
@@ -145,13 +158,25 @@ def run_cycle():
     usd_buy = usd_sell - USD_SULAYMANIYAH_SPREAD
     
     # EUR (USD * EUR/USD rate)
-    eur_usd_rate = get_live_rate("EUR", "USD") or 1.15
+    eur_usd_rate = get_live_rate("EUR", "USD")
+    if not eur_usd_rate:
+        eur_usd_rate = last_rates.get("eur_usd", 1.15)
+        log.warning("Using fallback EUR/USD rate: %f", eur_usd_rate)
+    else:
+        last_rates["eur_usd"] = eur_usd_rate
+        
     eur_sell = int(round((usd_sell * eur_usd_rate) / 100) * 100)
     eur_buy = eur_sell - EUR_SPREAD
     
     # Lira
-    lira_rate = get_live_rate("USD", "TRY") or 32.5
-    try_mid = usd_sell / lira_rate
+    usd_try_rate = get_live_rate("USD", "TRY")
+    if not usd_try_rate:
+        usd_try_rate = last_rates.get("usd_try", 32.5)
+        log.warning("Using fallback USD/TRY rate: %f", usd_try_rate)
+    else:
+        last_rates["usd_try"] = usd_try_rate
+        
+    try_mid = usd_sell / usd_try_rate
     try_sell = int(round(try_mid / 10) * 10)
     try_buy = try_sell - TRY_SPREAD
     
@@ -165,17 +190,17 @@ def run_cycle():
             changed = True; break
             
     if changed:
-        msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, lira_rate)
+        msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate)
         resp = tg_send_message(msg)
         if resp.get("ok"):
             state["last_keys"] = new_keys
+            state["last_rates"] = last_rates
             state["last_post_utc"] = dt.datetime.now(dt.timezone.utc).isoformat()
             save_state(state)
             return "posted"
     return "skipped"
 
 if __name__ == "__main__":
-    # REMOVED THE LOOP: Now it runs exactly once per execution
     try:
         print(f"Cycle result: {run_cycle()}")
     except Exception as e:
