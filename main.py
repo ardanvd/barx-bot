@@ -22,8 +22,8 @@ ORDER_CONTACT = "@barx_exchangee"
 
 USD_PRIMARY = "dollar_sulaymaniyah"
 USD_SULAYMANIYAH_MARKUP = 300
-USD_SULAYMANIYAH_SPREAD = 2000 # User requested: 2000 lower for buy
-EUR_SPREAD = 2000              # User requested: 2000 lower for buy
+USD_SULAYMANIYAH_SPREAD = 2000
+EUR_SPREAD = 2000
 TRY_SPREAD = 100
 
 WORKING_HOURS_START = 8
@@ -111,31 +111,37 @@ def get_live_rate(source, target):
     except: pass
     return None
 
-def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, lira_rate):
+def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate, eur_usd_rate):
     now = now_tehran()
+    # Calculate TRY rates for Turkey market section
+    usd_lira = usd_try_rate
+    eur_lira = usd_try_rate * eur_usd_rate
+    
     return f"""
-💎 <b>نرخ لحظه‌ای ارز بارکس</b>
-🗓 {now.strftime('%Y/%m/%d')} | ⏰ {now.strftime('%H:%M')}
+🚀 <b>Barx Exchange - نرخ لحظه‌ای ارز</b>
 
-🇺🇸 <b>دلار آمریکا</b>
-فروش: {usd_sell:,}
-خرید: {usd_buy:,}
+🇹🇷 <b>بازار ترکیه (TRY):</b>
+🇺🇸 دلار: {usd_lira:.4f} لیر
+🇪🇺 یورو: {eur_lira:.4f} لیر
 
-🇪🇺 <b>یورو اروپا</b>
-فروش: {eur_sell:,}
-خرید: {eur_buy:,}
+🇮🇷 <b>بازار ایران (تومان):</b>
+🇺🇸 <b>دلار آمریکا:</b>
+📥 خرید: {usd_buy:,}
+📤 فروش: {usd_sell:,}
 
-🇹🇷 <b>لیر ترکیه</b>
-فروش: {try_sell:,}
-خرید: {try_buy:,}
+🇪🇺 <b>یورو:</b>
+📥 خرید: {eur_buy:,}
+📤 فروش: {eur_sell:,}
 
-📊 <b>ریت ترکیه:</b> {lira_rate:.2f}
+🇹🇷 <b>حواله لیر ترکیه:</b>
+📥 خرید: {try_buy:,}
+📤 فروش: {try_sell:,}
 
 ------------------------
 📥 ثبت سفارش و مشاوره آنلاین:
 🆔 {ORDER_CONTACT}
 
-✅ {CHANNEL}
+✨ {CHANNEL}
 """
 
 def run_cycle():
@@ -172,7 +178,7 @@ def run_cycle():
             changed = True; break
             
     if changed:
-        msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate)
+        msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate, eur_usd_rate)
         resp = tg_send_message(msg)
         if resp.get("ok"):
             state["last_keys"] = new_keys
