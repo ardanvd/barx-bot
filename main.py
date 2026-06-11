@@ -21,8 +21,8 @@ CHANNEL = "@barxexchange"
 ORDER_CONTACT = "@barx_exchangee"
 
 USD_PRIMARY = "dollar_sulaymaniyah"
-USD_SULAYMANIYAH_MARKUP = 500  # User requested: 500 more than Sulaymaniyah
-USD_SULAYMANIYAH_SPREAD = 1000 # Standard spread
+USD_SULAYMANIYAH_MARKUP = 500
+USD_SULAYMANIYAH_SPREAD = 1000
 EUR_SPREAD = 1000
 TRY_SPREAD = 100
 
@@ -97,11 +97,11 @@ def extract_price(posts, min_v, max_v):
             if min_v <= val <= max_v: return val
     return None
 
-def get_lira_usd_rate():
+def get_live_rate(source, target):
     try:
-        r = requests.get("https://wise.com/rates/live?source=USD&target=TRY", headers={"User-Agent": USER_AGENT}, timeout=10)
-        return float(r.json().get("value", 32.5))
-    except: return 32.5
+        r = requests.get(f"https://wise.com/rates/live?source={source}&target={target}", headers={"User-Agent": USER_AGENT}, timeout=10)
+        return float(r.json().get("value"))
+    except: return None
 
 def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, lira_rate):
     now = now_tehran()
@@ -141,16 +141,16 @@ def run_cycle():
     suly_mid = extract_price(suly_posts, 100000, 300000)
     if not suly_mid: return "no_price"
     
-    # User requested: 500 more than Sulaymaniyah
     usd_sell = suly_mid + USD_SULAYMANIYAH_MARKUP
     usd_buy = usd_sell - USD_SULAYMANIYAH_SPREAD
     
-    # EUR (USD * 1.085 approx)
-    eur_sell = int(round((usd_sell * 1.085) / 100) * 100)
+    # EUR (USD * EUR/USD rate)
+    eur_usd_rate = get_live_rate("EUR", "USD") or 1.15
+    eur_sell = int(round((usd_sell * eur_usd_rate) / 100) * 100)
     eur_buy = eur_sell - EUR_SPREAD
     
     # Lira
-    lira_rate = get_lira_usd_rate()
+    lira_rate = get_live_rate("USD", "TRY") or 32.5
     try_mid = usd_sell / lira_rate
     try_sell = int(round(try_mid / 10) * 10)
     try_buy = try_sell - TRY_SPREAD
