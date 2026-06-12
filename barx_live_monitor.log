@@ -29887,3 +29887,4 @@
 2026-06-11 15:08:45,222 [ERROR] TG send failed! Response: {'ok': False, 'error_code': 401, 'description': 'Unauthorized'}
 2026-06-11 15:08:45,222 [INFO] Cycle result: {'action': 'error', 'detail': 'tg_fail: Unauthorized'}
 2026-06-11 15:08:45,222 [INFO] Waiting 2 minutes for next check...
+2026-06-12 14:06:11,173 [INFO] Price found from Sulaymaniyah: 177500
