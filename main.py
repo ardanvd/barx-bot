@@ -20,7 +20,12 @@ LOG_PATH = HOME / "barx_live_monitor.log"
 CHANNEL = "@barxexchange"
 ORDER_CONTACT = "@barx_exchangee"
 
-USD_PRIMARY = "dollar_sulaymaniyah"
+# Sources
+SOURCES = [
+    {"id": "dollar_sulaymaniyah", "name": "Sulaymaniyah"},
+    {"id": "pi_jt", "name": "Tehran"}
+]
+
 USD_SULAYMANIYAH_MARKUP = 300
 USD_SULAYMANIYAH_SPREAD = 2000
 EUR_SPREAD = 2000
@@ -84,22 +89,22 @@ def fetch_channel_posts(username):
         r = requests.get(f"https://t.me/s/{username}", headers={"User-Agent": USER_AGENT}, timeout=20)
         soup = BeautifulSoup(r.text, "html.parser")
         msgs = soup.select(".tgme_widget_message_text")
-        out = []
-        for m in msgs[-10:]:
-            out.append(m.get_text())
-        return out
+        return [m.get_text() for m in msgs[-15:]]
     except: return []
 
 def extract_price(posts, min_v, max_v):
-    # Improved extraction: Look for keywords like "فروش" or "معامله" to avoid summary numbers
+    # More robust extraction: Look for numbers in messages that contain currency keywords
     for txt in reversed(posts):
-        if any(kw in txt for kw in ["فروش", "معامله", "سلێمانی"]):
-            txt_norm = txt.translate(PERSIAN_DIGITS)
-            # Find the largest number in the message that fits the range
-            matches = [int(m.group(0).replace(",", "")) for m in NUM_RE.finditer(txt_norm)]
-            valid_matches = [v for v in matches if min_v <= v <= max_v]
-            if valid_matches:
-                return max(valid_matches)
+        txt_norm = txt.translate(PERSIAN_DIGITS)
+        # Find all numbers that look like currency (e.g., 182,400)
+        matches = [int(m.group(0).replace(",", "")) for m in NUM_RE.finditer(txt_norm)]
+        valid_matches = [v for v in matches if min_v <= v <= max_v]
+        
+        # If multiple valid numbers, prioritize those near keywords
+        if valid_matches:
+            if any(kw in txt for kw in ["فروش", "معامله", "نقدی", "سلێمانی", "تهران"]):
+                return valid_matches[0] # Usually the first number is the main rate
+            return valid_matches[0]
     return None
 
 def get_live_rate(source, target):
@@ -154,18 +159,24 @@ def run_cycle():
     state = load_state()
     last_rates = state.get("last_rates", {"eur_usd": 1.15, "usd_try": 32.5})
     
-    suly_posts = fetch_channel_posts(USD_PRIMARY)
-    suly_mid = extract_price(suly_posts, 150000, 250000) # Narrowed range to avoid small numbers
-    if not suly_mid: return "no_price"
+    usd_mid = None
+    for src in SOURCES:
+        posts = fetch_channel_posts(src["id"])
+        usd_mid = extract_price(posts, 150000, 250000)
+        if usd_mid:
+            log.info(f"Price found from {src['name']}: {usd_mid}")
+            break
+            
+    if not usd_mid: return "no_price"
     
-    usd_sell = suly_mid + USD_SULAYMANIYAH_MARKUP
+    usd_sell = usd_mid + USD_SULAYMANIYAH_MARKUP
     usd_buy = usd_sell - USD_SULAYMANIYAH_SPREAD
     
-    # Sanity check: Don't allow more than 5000 drop from last known price
+    # Sanity check
     last_usd_sell = state.get("last_keys", {}).get("usd_sell")
-    if last_usd_sell and (last_usd_sell - usd_sell > 5000):
-        log.warning("Price drop too high (%d -> %d). Skipping.", last_usd_sell, usd_sell)
-        return "price_drop_protection"
+    if last_usd_sell and (abs(last_usd_sell - usd_sell) > 10000):
+        log.warning("Price jump too high (%d -> %d). Skipping.", last_usd_sell, usd_sell)
+        return "price_jump_protection"
 
     eur_usd_rate = get_live_rate("EUR", "USD") or last_rates.get("eur_usd", 1.15)
     last_rates["eur_usd"] = eur_usd_rate
