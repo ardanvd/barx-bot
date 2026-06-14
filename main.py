@@ -102,7 +102,7 @@ def extract_price(posts, min_v, max_v):
         matches = [int(m.group(0).replace(",", "")) for m in NUM_RE.finditer(txt_norm)]
         valid_matches = [v for v in matches if min_v <= v <= max_v]
         if valid_matches:
-            if any(kw in txt for kw in ["فروش", "معامله", "نقدی", "سلێمانی", "تهران"]):
+            if any(kw in txt for kw in ["سلیمانیه", "سلیمانیه فردایی"]) and "چاورما" not in txt:
                 return valid_matches[0]
             return valid_matches[0]
     return None
