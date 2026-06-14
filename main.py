@@ -34,6 +34,10 @@ TRY_SPREAD = 100
 WORKING_HOURS_START = 8
 WORKING_HOURS_END = 24
 
+# Monitoring Config
+MONITOR_DURATION_MINS = 30
+CHECK_INTERVAL_SECS = 120
+
 TEHRAN_TZ = dt.timezone(dt.timedelta(hours=3, minutes=30))
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
@@ -93,17 +97,13 @@ def fetch_channel_posts(username):
     except: return []
 
 def extract_price(posts, min_v, max_v):
-    # More robust extraction: Look for numbers in messages that contain currency keywords
     for txt in reversed(posts):
         txt_norm = txt.translate(PERSIAN_DIGITS)
-        # Find all numbers that look like currency (e.g., 182,400)
         matches = [int(m.group(0).replace(",", "")) for m in NUM_RE.finditer(txt_norm)]
         valid_matches = [v for v in matches if min_v <= v <= max_v]
-        
-        # If multiple valid numbers, prioritize those near keywords
         if valid_matches:
             if any(kw in txt for kw in ["فروش", "معامله", "نقدی", "سلێمانی", "تهران"]):
-                return valid_matches[0] # Usually the first number is the main rate
+                return valid_matches[0]
             return valid_matches[0]
     return None
 
@@ -163,9 +163,7 @@ def run_cycle():
     for src in SOURCES:
         posts = fetch_channel_posts(src["id"])
         usd_mid = extract_price(posts, 150000, 250000)
-        if usd_mid:
-            log.info(f"Price found from {src['name']}: {usd_mid}")
-            break
+        if usd_mid: break
             
     if not usd_mid: return "no_price"
     
@@ -175,7 +173,6 @@ def run_cycle():
     # Sanity check
     last_usd_sell = state.get("last_keys", {}).get("usd_sell")
     if last_usd_sell and (abs(last_usd_sell - usd_sell) > 10000):
-        log.warning("Price jump too high (%d -> %d). Skipping.", last_usd_sell, usd_sell)
         return "price_jump_protection"
 
     eur_usd_rate = get_live_rate("EUR", "USD") or last_rates.get("eur_usd", 1.15)
@@ -209,5 +206,16 @@ def run_cycle():
     return "skipped"
 
 if __name__ == "__main__":
-    try: print(f"Cycle result: {run_cycle()}")
-    except Exception as e: print(f"Error: {e}")
+    start_time = time.time()
+    end_time = start_time + (MONITOR_DURATION_MINS * 60)
+    
+    print(f"Starting monitor for {MONITOR_DURATION_MINS} minutes...")
+    while time.time() < end_time:
+        try:
+            res = run_cycle()
+            print(f"Cycle result: {res}")
+        except Exception as e:
+            print(f"Error: {e}")
+        
+        # Wait for next check
+        time.sleep(CHECK_INTERVAL_SECS)
