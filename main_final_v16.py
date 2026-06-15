@@ -118,7 +118,9 @@ def extract_price(posts, min_v, max_v):
         matches = [int(m.group(0).replace(",", "")) for m in NUM_RE.finditer(txt_norm)]
         valid_matches = [v for v in matches if min_v <= v <= max_v]
 
-        if valid_matches and any(kw in txt for kw in ["سلێمانی", "سلێمانی فردایی"]) and "فروش" in txt and "خــرید" not in txt and "پسفردایی" not in txt and "چاورما" not in txt:
+        # Exclude summary messages and focus on standard price posts
+        exclude_keywords = ["خــرید", "پسفردایی", "چاورما", "کورتەی", "دەستپێکردن", "بەرزترین", "نزمترین", "کۆتایی"]
+        if valid_matches and any(kw in txt for kw in ["سلێمانی", "سلێمانی فردایی"]) and "فروش" in txt and not any(ex in txt for ex in exclude_keywords):
             if not sell_price: # Take the first (most recent) sell price
                 sell_price = valid_matches[0]
                 break # Found the sell price, no need to continue
