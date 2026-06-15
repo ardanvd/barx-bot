@@ -85,6 +85,22 @@ def tg_send_message(text):
     try: return requests.post(url, json=payload, timeout=30).json()
     except: return {"ok": False}
 
+def tg_get_last_message():
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
+    payload = {"chat_id": CHANNEL_ID, "limit": 1}
+    try:
+        response = requests.get(url, json=payload, timeout=30).json()
+        if response.get("ok") and response.get("result"):
+            # Filter for channel_post (for public channels) or message (for private chats)
+            for update in reversed(response["result"]):
+                if "channel_post" in update:
+                    return update["channel_post"].get("text")
+                elif "message" in update:
+                    return update["message"].get("text")
+    except Exception as e:
+        log.error(f"Error fetching last message: {e}")
+    return None
+
 PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٫٬", "0123456789..")
 NUM_RE = re.compile(r"[\d,]+")
 
@@ -196,6 +212,11 @@ def run_cycle():
             
     if changed:
         msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate, eur_usd_rate)
+        last_channel_message = tg_get_last_message()
+        if last_channel_message and msg == last_channel_message:
+            log.info("Skipping post: Message is identical to the last one in the channel.")
+            return "skipped_duplicate"
+
         resp = tg_send_message(msg)
         if resp.get("ok"):
             state["last_keys"] = new_keys
