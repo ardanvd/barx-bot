@@ -119,11 +119,17 @@ def extract_price(posts, min_v, max_v, source_type="Sulaymaniyah"):
         valid_matches = [v for v in matches if min_v <= v <= max_v]
 
         if source_type == "Sulaymaniyah":
-            # Exclude summary messages and focus on standard price posts
-            exclude_keywords = ["خــرید", "پسفردایی", "چاورما", "کورتەی", "دەستپێکردن", "بەرزترین", "نزمترین", "کۆتایی", "مشهد", "هرات"]
-            if valid_matches and any(kw in txt for kw in ["سلێمانی", "سلێمانی فردایی"]) and "فروش" in txt and not any(ex in txt for ex in exclude_keywords):
+            # EXTREMELY STRICT: Must have 'سلێمانی', must have 'فروش', must NOT have any excluded keywords
+            exclude_keywords = ["خــرید", "پسفردایی", "چاورما", "کورتەی", "دەستپێکردن", "بەرزترین", "نزمترین", "کۆتایی", "مشهد", "هرات", "کف"]
+            # Ensure 'سلێمانی' is actually in the text
+            has_suly = "سلێمانی" in txt
+            has_sell = "فروش" in txt
+            has_excluded = any(ex in txt for ex in exclude_keywords)
+            
+            if valid_matches and has_suly and has_sell and not has_excluded:
                 if not sell_price:
                     sell_price = valid_matches[0]
+                    log.info(f"Matched Sulaymaniyah price: {sell_price} from text: {txt[:50]}...")
                     break
         elif source_type == "Tehran":
             if valid_matches and "تهران" in txt and "فروش" in txt:
