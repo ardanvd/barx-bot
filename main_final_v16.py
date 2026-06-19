@@ -110,7 +110,7 @@ def fetch_channel_posts(username):
         return [m.get_text() for m in msgs[-15:]]
     except: return []
 
-def extract_price(posts, min_v, max_v):
+def extract_price(posts, min_v, max_v, source_type="Sulaymaniyah"):
     sell_price = None
 
     for txt in reversed(posts):
@@ -118,12 +118,18 @@ def extract_price(posts, min_v, max_v):
         matches = [int(m.group(0).replace(",", "")) for m in NUM_RE.finditer(txt_norm)]
         valid_matches = [v for v in matches if min_v <= v <= max_v]
 
-        # Exclude summary messages and focus on standard price posts
-        exclude_keywords = ["خــرید", "پسفردایی", "چاورما", "کورتەی", "دەستپێکردن", "بەرزترین", "نزمترین", "کۆتایی"]
-        if valid_matches and any(kw in txt for kw in ["سلێمانی", "سلێمانی فردایی"]) and "فروش" in txt and not any(ex in txt for ex in exclude_keywords):
-            if not sell_price: # Take the first (most recent) sell price
-                sell_price = valid_matches[0]
-                break # Found the sell price, no need to continue
+        if source_type == "Sulaymaniyah":
+            # Exclude summary messages and focus on standard price posts
+            exclude_keywords = ["خــرید", "پسفردایی", "چاورما", "کورتەی", "دەستپێکردن", "بەرزترین", "نزمترین", "کۆتایی"]
+            if valid_matches and any(kw in txt for kw in ["سلێمانی", "سلێمانی فردایی"]) and "فروش" in txt and not any(ex in txt for ex in exclude_keywords):
+                if not sell_price:
+                    sell_price = valid_matches[0]
+                    break
+        elif source_type == "Tehran":
+            if valid_matches and "تهران" in txt and "فروش" in txt:
+                if not sell_price:
+                    sell_price = valid_matches[0]
+                    break
 
     return {"sell": sell_price}
 
@@ -180,11 +186,21 @@ def run_cycle():
     last_rates = state.get("last_rates", {"eur_usd": 1.15, "usd_try": 32.5})
     
     usd_prices = {"sell": None}
-    for src in SOURCES:
-        posts = fetch_channel_posts(src["id"])
-        extracted = extract_price(posts, 150000, 250000)
-        if extracted["sell"]: usd_prices["sell"] = extracted["sell"]
-        if usd_prices["sell"]: break
+    # Priority 1: Sulaymaniyah
+    suly_posts = fetch_channel_posts("dollar_sulaymaniyah")
+    suly_extracted = extract_price(suly_posts, 150000, 250000, source_type="Sulaymaniyah")
+    if suly_extracted["sell"]:
+        usd_prices["sell"] = suly_extracted["sell"]
+        log.info(f"Using Sulaymaniyah price: {usd_prices['sell']}")
+    else:
+        # Priority 2: Tehran
+        tehran_posts = fetch_channel_posts("pi_jt")
+        tehran_extracted = extract_price(tehran_posts, 150000, 250000, source_type="Tehran")
+        if tehran_extracted["sell"]:
+            usd_prices["sell"] = tehran_extracted["sell"]
+            log.info(f"Sulaymaniyah not found. Using Tehran price: {usd_prices['sell']}")
+        else:
+            log.info("No valid price found in Sulaymaniyah or Tehran.")
 
     if not usd_prices["sell"]: return "no_price"
 
