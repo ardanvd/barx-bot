@@ -1,12 +1,12 @@
 {
-  "last_post_utc": "2026-07-19T10:48:53.661523+00:00",
+  "last_post_utc": "2026-07-19T11:44:24.597420+00:00",
   "last_keys": {
-    "usd_buy": 192700,
-    "usd_sell": 194700,
-    "eur_buy": 220700,
-    "eur_sell": 222700,
-    "try_buy": 4030,
-    "try_sell": 4130
+    "usd_buy": 188800,
+    "usd_sell": 190800,
+    "eur_buy": 216200,
+    "eur_sell": 218200,
+    "try_buy": 3950,
+    "try_sell": 4050
   },
   "last_source_clocks": {
     "pi_jt": "2026-05-05T16:45:30+00:00",
