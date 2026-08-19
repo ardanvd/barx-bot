@@ -24,7 +24,7 @@ SOURCES = [
     {"id": "pi_jt", "name": "Tehran"}
 ]
 
-USD_SULAYMANIYAH_MARKUP = 300
+USD_MARKUP = 1500  # Updated to 1500 higher as requested
 USD_SULAYMANIYAH_SPREAD = 2000
 EUR_SPREAD = 2000
 TRY_SPREAD = 100
@@ -83,22 +83,6 @@ def tg_send_message(text):
     try: return requests.post(url, json=payload, timeout=30).json()
     except: return {"ok": False}
 
-def tg_get_last_message():
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
-    payload = {"chat_id": CHANNEL_ID, "limit": 1}
-    try:
-        response = requests.get(url, json=payload, timeout=30).json()
-        if response.get("ok") and response.get("result"):
-            # Filter for channel_post (for public channels) or message (for private chats)
-            for update in reversed(response["result"]):
-                if "channel_post" in update:
-                    return update["channel_post"].get("text")
-                elif "message" in update:
-                    return update["message"].get("text")
-    except Exception as e:
-        log.error(f"Error fetching last message: {e}")
-    return None
-
 PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٫٬", "0123456789..")
 NUM_RE = re.compile(r"[\d,]+")
 
@@ -119,9 +103,7 @@ def extract_price(posts, min_v, max_v, source_type="Sulaymaniyah"):
         valid_matches = [v for v in matches if min_v <= v <= max_v]
 
         if source_type == "Sulaymaniyah":
-            # EXTREMELY STRICT: Must have 'سلێمانی', must have 'فروش', must NOT have any excluded keywords
             exclude_keywords = ["خــرید", "پسفردایی", "چاورما", "کورتەی", "دەستپێکردن", "بەرزترین", "نزمترین", "کۆتایی", "مشهد", "هرات", "کف"]
-            # Ensure 'سلێمانی' is actually in the text
             has_suly = "سلێمانی" in txt
             has_sell = "فروش" in txt
             has_excluded = any(ex in txt for ex in exclude_keywords)
@@ -153,7 +135,6 @@ def get_live_rate(source, target):
     return None
 
 def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate, eur_usd_rate):
-    now = now_tehran()
     usd_lira = usd_try_rate
     eur_lira = usd_try_rate * eur_usd_rate
     
@@ -192,34 +173,27 @@ def run_cycle():
     last_rates = state.get("last_rates", {"eur_usd": 1.15, "usd_try": 32.5})
     
     usd_prices = {"sell": None}
-    # Priority 1: Sulaymaniyah
+    # Priority 1: Sulaymaniyah (Primary source rule)
     suly_posts = fetch_channel_posts("dollar_sulaymaniyah")
     suly_extracted = extract_price(suly_posts, 150000, 250000, source_type="Sulaymaniyah")
     if suly_extracted["sell"]:
         usd_prices["sell"] = suly_extracted["sell"]
         log.info(f"Using Sulaymaniyah price: {usd_prices['sell']}")
     else:
-        # Priority 2: Tehran
+        # Priority 2: Tehran (Fallback)
         tehran_posts = fetch_channel_posts("pi_jt")
         tehran_extracted = extract_price(tehran_posts, 150000, 250000, source_type="Tehran")
         if tehran_extracted["sell"]:
             usd_prices["sell"] = tehran_extracted["sell"]
             log.info(f"Sulaymaniyah not found. Using Tehran price: {usd_prices['sell']}")
-        else:
-            log.info("No valid price found in Sulaymaniyah or Tehran.")
 
     if not usd_prices["sell"]: return "no_price"
 
     usd_mid = usd_prices["sell"]
 
-    usd_sell = usd_mid + USD_SULAYMANIYAH_MARKUP
+    usd_sell = usd_mid + USD_MARKUP
     usd_buy = usd_sell - USD_SULAYMANIYAH_SPREAD
     
-    # Sanity check
-    last_usd_sell = state.get("last_keys", {}).get("usd_sell")
-    if last_usd_sell and (abs(last_usd_sell - usd_sell) > 10000):
-        return "price_jump_protection"
-
     eur_usd_rate = get_live_rate("EUR", "USD") or last_rates.get("eur_usd", 1.15)
     last_rates["eur_usd"] = eur_usd_rate
     eur_sell = int(round((usd_sell * eur_usd_rate) / 100) * 100)
@@ -241,8 +215,7 @@ def run_cycle():
             
     if changed:
         msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate, eur_usd_rate)
-        # Check for duplicates by scraping the target channel
-        target_channel_posts = fetch_channel_posts(CHANNEL_ID.replace("@", "")) # Remove @ for username
+        target_channel_posts = fetch_channel_posts(CHANNEL_ID.replace("@", ""))
         if target_channel_posts and msg in target_channel_posts:
             log.info("Skipping post: Message is identical to one of the last messages in the target channel.")
             return "skipped_duplicate"
@@ -268,5 +241,4 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Error: {e}")
         
-        # Wait for next check
         time.sleep(CHECK_INTERVAL_SECS)
