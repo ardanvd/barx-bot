@@ -2,8 +2,6 @@ import os
 import re
 import json
 import time
-import html
-import math
 import logging
 import datetime as dt
 from pathlib import Path
@@ -22,17 +20,17 @@ ORDER_CONTACT = "@barx_exchangee"
 
 # Sources
 SOURCES = [
-    {"id": "dollar_sulaymaniyah", "name": "Sulaymaniyah"},
-    {"id": "pi_jt", "name": "Tehran"}
+    {"id": "pi_jt", "name": "Tehran"},
+    {"id": "dollar_sulaymaniyah", "name": "Sulaymaniyah"}
 ]
 
-USD_SULAYMANIYAH_MARKUP = 300
-USD_SULAYMANIYAH_SPREAD = 2000
+USD_MARKUP = 1500  # Added 1500 to the base price
+USD_SPREAD = 2000
 EUR_SPREAD = 2000
 TRY_SPREAD = 100
 
-WORKING_HOURS_START = 8
-WORKING_HOURS_END = 24
+WORKING_HOURS_START = 11
+WORKING_HOURS_END = 21
 
 # Monitoring Config
 MONITOR_DURATION_MINS = 30
@@ -85,22 +83,6 @@ def tg_send_message(text):
     try: return requests.post(url, json=payload, timeout=30).json()
     except: return {"ok": False}
 
-def tg_get_last_message():
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
-    payload = {"chat_id": CHANNEL_ID, "limit": 1}
-    try:
-        response = requests.get(url, json=payload, timeout=30).json()
-        if response.get("ok") and response.get("result"):
-            # Filter for channel_post (for public channels) or message (for private chats)
-            for update in reversed(response["result"]):
-                if "channel_post" in update:
-                    return update["channel_post"].get("text")
-                elif "message" in update:
-                    return update["message"].get("text")
-    except Exception as e:
-        log.error(f"Error fetching last message: {e}")
-    return None
-
 PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٫٬", "0123456789..")
 NUM_RE = re.compile(r"[\d,]+")
 
@@ -112,16 +94,30 @@ def fetch_channel_posts(username):
         return [m.get_text() for m in msgs[-15:]]
     except: return []
 
-def extract_price(posts, min_v, max_v):
+def extract_price(posts, min_v, max_v, source_type="Tehran"):
+    sell_price = None
     for txt in reversed(posts):
         txt_norm = txt.translate(PERSIAN_DIGITS)
         matches = [int(m.group(0).replace(",", "")) for m in NUM_RE.finditer(txt_norm)]
         valid_matches = [v for v in matches if min_v <= v <= max_v]
-        if valid_matches:
-            if any(kw in txt for kw in ["سلێمانی", "سلێمانی فردایی"]) and "چاورما" not in txt:
-                return valid_matches[0]
-            return valid_matches[0]
-    return None
+
+        if source_type == "Tehran":
+            if valid_matches and "تهران" in txt and "فروش" in txt:
+                if not sell_price:
+                    sell_price = valid_matches[0]
+                    log.info(f"Matched Tehran price: {sell_price}")
+                    break
+        elif source_type == "Sulaymaniyah":
+            exclude_keywords = ["خــرید", "پسفردایی", "چاورما", "کورتەی", "دەستپێکردن", "بەرزترین", "نزمترین", "کۆتایی", "مشهد", "هرات", "کف"]
+            has_suly = "سلێمانی" in txt
+            has_sell = "فروش" in txt
+            has_excluded = any(ex in txt for ex in exclude_keywords)
+            if valid_matches and has_suly and has_sell and not has_excluded:
+                if not sell_price:
+                    sell_price = valid_matches[0]
+                    log.info(f"Matched Sulaymaniyah price: {sell_price}")
+                    break
+    return {"sell": sell_price}
 
 def get_live_rate(source, target):
     try:
@@ -137,7 +133,6 @@ def get_live_rate(source, target):
     return None
 
 def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate, eur_usd_rate):
-    now = now_tehran()
     usd_lira = usd_try_rate
     eur_lira = usd_try_rate * eur_usd_rate
     
@@ -175,22 +170,27 @@ def run_cycle():
     state = load_state()
     last_rates = state.get("last_rates", {"eur_usd": 1.15, "usd_try": 32.5})
     
-    usd_mid = None
-    for src in SOURCES:
-        posts = fetch_channel_posts(src["id"])
-        usd_mid = extract_price(posts, 150000, 250000)
-        if usd_mid: break
-            
-    if not usd_mid: return "no_price"
-    
-    usd_sell = usd_mid + USD_SULAYMANIYAH_MARKUP
-    usd_buy = usd_sell - USD_SULAYMANIYAH_SPREAD
-    
-    # Sanity check
-    last_usd_sell = state.get("last_keys", {}).get("usd_sell")
-    if last_usd_sell and (abs(last_usd_sell - usd_sell) > 10000):
-        return "price_jump_protection"
+    usd_prices = {"sell": None}
+    # Priority 1: Tehran (User requested)
+    tehran_posts = fetch_channel_posts("pi_jt")
+    tehran_extracted = extract_price(tehran_posts, 150000, 250000, source_type="Tehran")
+    if tehran_extracted["sell"]:
+        usd_prices["sell"] = tehran_extracted["sell"]
+        log.info(f"Using Tehran price: {usd_prices['sell']}")
+    else:
+        # Priority 2: Sulaymaniyah (Fallback)
+        suly_posts = fetch_channel_posts("dollar_sulaymaniyah")
+        suly_extracted = extract_price(suly_posts, 150000, 250000, source_type="Sulaymaniyah")
+        if suly_extracted["sell"]:
+            usd_prices["sell"] = suly_extracted["sell"]
+            log.info(f"Tehran not found. Using Sulaymaniyah price: {usd_prices['sell']}")
 
+    if not usd_prices["sell"]: return "no_price"
+
+    usd_mid = usd_prices["sell"]
+    usd_sell = usd_mid + USD_MARKUP
+    usd_buy = usd_sell - USD_SPREAD
+    
     eur_usd_rate = get_live_rate("EUR", "USD") or last_rates.get("eur_usd", 1.15)
     last_rates["eur_usd"] = eur_usd_rate
     eur_sell = int(round((usd_sell * eur_usd_rate) / 100) * 100)
@@ -204,19 +204,13 @@ def run_cycle():
     
     new_keys = {"usd_buy": usd_buy, "usd_sell": usd_sell, "eur_buy": eur_buy, "eur_sell": eur_sell, "try_buy": try_buy, "try_sell": try_sell}
     
-    changed = False
-    last_keys = state.get("last_keys", {})
-    for k in new_keys:
-        if new_keys[k] != last_keys.get(k):
-            changed = True; break
+    # FORCED UPDATE FOR THIS RUN
+    changed = True 
             
     if changed:
         msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate, eur_usd_rate)
-        last_channel_message = tg_get_last_message()
-        if last_channel_message and msg == last_channel_message:
-            log.info("Skipping post: Message is identical to the last one in the channel.")
-            return "skipped_duplicate"
-
+        # REMOVED DUPLICATE CHECK TO FORCE POST
+        
         resp = tg_send_message(msg)
         if resp.get("ok"):
             state["last_keys"] = new_keys
@@ -227,16 +221,20 @@ def run_cycle():
     return "skipped"
 
 if __name__ == "__main__":
+    # RUN ONCE IMMEDIATELY AND EXIT (FOR THIS UPDATE)
+    try:
+        res = run_cycle()
+        print(f"Immediate run result: {res}")
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    # Continue normal loop
     start_time = time.time()
     end_time = start_time + (MONITOR_DURATION_MINS * 60)
-    
-    print(f"Starting monitor for {MONITOR_DURATION_MINS} minutes...")
     while time.time() < end_time:
         try:
             res = run_cycle()
             print(f"Cycle result: {res}")
         except Exception as e:
             print(f"Error: {e}")
-        
-        # Wait for next check
         time.sleep(CHECK_INTERVAL_SECS)
