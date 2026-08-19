@@ -204,19 +204,13 @@ def run_cycle():
     
     new_keys = {"usd_buy": usd_buy, "usd_sell": usd_sell, "eur_buy": eur_buy, "eur_sell": eur_sell, "try_buy": try_buy, "try_sell": try_sell}
     
-    changed = False
-    last_keys = state.get("last_keys", {})
-    for k in new_keys:
-        if new_keys[k] != last_keys.get(k):
-            changed = True; break
+    # FORCED UPDATE FOR THIS RUN
+    changed = True 
             
     if changed:
         msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate, eur_usd_rate)
-        target_channel_posts = fetch_channel_posts(CHANNEL_ID.replace("@", ""))
-        if target_channel_posts and msg in target_channel_posts:
-            log.info("Skipping post: Duplicate found.")
-            return "skipped_duplicate"
-
+        # REMOVED DUPLICATE CHECK TO FORCE POST
+        
         resp = tg_send_message(msg)
         if resp.get("ok"):
             state["last_keys"] = new_keys
@@ -227,6 +221,14 @@ def run_cycle():
     return "skipped"
 
 if __name__ == "__main__":
+    # RUN ONCE IMMEDIATELY AND EXIT (FOR THIS UPDATE)
+    try:
+        res = run_cycle()
+        print(f"Immediate run result: {res}")
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    # Continue normal loop
     start_time = time.time()
     end_time = start_time + (MONITOR_DURATION_MINS * 60)
     while time.time() < end_time:
