@@ -1,10 +1,10 @@
 {
-  "last_post_utc": "2026-08-19T10:18:31.660841+00:00",
+  "last_post_utc": "2026-08-19T11:04:41.378575+00:00",
   "last_keys": {
-    "usd_buy": 190800,
-    "usd_sell": 192800,
-    "eur_buy": 221800,
-    "eur_sell": 223800,
+    "usd_buy": 190600,
+    "usd_sell": 192600,
+    "eur_buy": 221500,
+    "eur_sell": 223500,
     "try_buy": 3920,
     "try_sell": 4020
   },
@@ -18,7 +18,7 @@
   "end_of_trading_date": null,
   "last_cycle_utc": "2026-05-05T23:35:38.898842+00:00",
   "last_rates": {
-    "eur_usd": 1.16095,
-    "usd_try": 47.9375
+    "eur_usd": 1.1606,
+    "usd_try": 47.937
   }
 }
