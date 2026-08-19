@@ -160,7 +160,7 @@ def render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try
 📥 ثبت سفارش و مشاوره آنلاین:
 🆔 {ORDER_CONTACT}
 
-✨ {CHANNEL}
+✨ {CHANNEL} ✅
 """
 
 def run_cycle():
