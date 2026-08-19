@@ -46,6 +46,7 @@ logging.basicConfig(
     handlers=[logging.FileHandler(LOG_PATH, encoding="utf-8"), logging.StreamHandler()],
 )
 log = logging.getLogger("barx")
+print(f"DEBUG: Markup is {USD_MARKUP}")
 
 # -------------------- Env / Token --------------------
 def load_env():
