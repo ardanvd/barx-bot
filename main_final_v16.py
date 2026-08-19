@@ -20,12 +20,12 @@ ORDER_CONTACT = "@barx_exchangee"
 
 # Sources
 SOURCES = [
-    {"id": "dollar_sulaymaniyah", "name": "Sulaymaniyah"},
-    {"id": "pi_jt", "name": "Tehran"}
+    {"id": "pi_jt", "name": "Tehran"},
+    {"id": "dollar_sulaymaniyah", "name": "Sulaymaniyah"}
 ]
 
-USD_MARKUP = 1500  # Updated to 1500 higher as requested
-USD_SULAYMANIYAH_SPREAD = 2000
+USD_MARKUP = 1500  # Added 1500 to the base price
+USD_SPREAD = 2000
 EUR_SPREAD = 2000
 TRY_SPREAD = 100
 
@@ -94,31 +94,29 @@ def fetch_channel_posts(username):
         return [m.get_text() for m in msgs[-15:]]
     except: return []
 
-def extract_price(posts, min_v, max_v, source_type="Sulaymaniyah"):
+def extract_price(posts, min_v, max_v, source_type="Tehran"):
     sell_price = None
-
     for txt in reversed(posts):
         txt_norm = txt.translate(PERSIAN_DIGITS)
         matches = [int(m.group(0).replace(",", "")) for m in NUM_RE.finditer(txt_norm)]
         valid_matches = [v for v in matches if min_v <= v <= max_v]
 
-        if source_type == "Sulaymaniyah":
+        if source_type == "Tehran":
+            if valid_matches and "تهران" in txt and "فروش" in txt:
+                if not sell_price:
+                    sell_price = valid_matches[0]
+                    log.info(f"Matched Tehran price: {sell_price}")
+                    break
+        elif source_type == "Sulaymaniyah":
             exclude_keywords = ["خــرید", "پسفردایی", "چاورما", "کورتەی", "دەستپێکردن", "بەرزترین", "نزمترین", "کۆتایی", "مشهد", "هرات", "کف"]
             has_suly = "سلێمانی" in txt
             has_sell = "فروش" in txt
             has_excluded = any(ex in txt for ex in exclude_keywords)
-            
             if valid_matches and has_suly and has_sell and not has_excluded:
                 if not sell_price:
                     sell_price = valid_matches[0]
-                    log.info(f"Matched Sulaymaniyah price: {sell_price} from text: {txt[:50]}...")
+                    log.info(f"Matched Sulaymaniyah price: {sell_price}")
                     break
-        elif source_type == "Tehran":
-            if valid_matches and "تهران" in txt and "فروش" in txt:
-                if not sell_price:
-                    sell_price = valid_matches[0]
-                    break
-
     return {"sell": sell_price}
 
 def get_live_rate(source, target):
@@ -173,26 +171,25 @@ def run_cycle():
     last_rates = state.get("last_rates", {"eur_usd": 1.15, "usd_try": 32.5})
     
     usd_prices = {"sell": None}
-    # Priority 1: Sulaymaniyah (Primary source rule)
-    suly_posts = fetch_channel_posts("dollar_sulaymaniyah")
-    suly_extracted = extract_price(suly_posts, 150000, 250000, source_type="Sulaymaniyah")
-    if suly_extracted["sell"]:
-        usd_prices["sell"] = suly_extracted["sell"]
-        log.info(f"Using Sulaymaniyah price: {usd_prices['sell']}")
+    # Priority 1: Tehran (User requested)
+    tehran_posts = fetch_channel_posts("pi_jt")
+    tehran_extracted = extract_price(tehran_posts, 150000, 250000, source_type="Tehran")
+    if tehran_extracted["sell"]:
+        usd_prices["sell"] = tehran_extracted["sell"]
+        log.info(f"Using Tehran price: {usd_prices['sell']}")
     else:
-        # Priority 2: Tehran (Fallback)
-        tehran_posts = fetch_channel_posts("pi_jt")
-        tehran_extracted = extract_price(tehran_posts, 150000, 250000, source_type="Tehran")
-        if tehran_extracted["sell"]:
-            usd_prices["sell"] = tehran_extracted["sell"]
-            log.info(f"Sulaymaniyah not found. Using Tehran price: {usd_prices['sell']}")
+        # Priority 2: Sulaymaniyah (Fallback)
+        suly_posts = fetch_channel_posts("dollar_sulaymaniyah")
+        suly_extracted = extract_price(suly_posts, 150000, 250000, source_type="Sulaymaniyah")
+        if suly_extracted["sell"]:
+            usd_prices["sell"] = suly_extracted["sell"]
+            log.info(f"Tehran not found. Using Sulaymaniyah price: {usd_prices['sell']}")
 
     if not usd_prices["sell"]: return "no_price"
 
     usd_mid = usd_prices["sell"]
-
     usd_sell = usd_mid + USD_MARKUP
-    usd_buy = usd_sell - USD_SULAYMANIYAH_SPREAD
+    usd_buy = usd_sell - USD_SPREAD
     
     eur_usd_rate = get_live_rate("EUR", "USD") or last_rates.get("eur_usd", 1.15)
     last_rates["eur_usd"] = eur_usd_rate
@@ -217,7 +214,7 @@ def run_cycle():
         msg = render_post(usd_buy, usd_sell, eur_buy, eur_sell, try_buy, try_sell, usd_try_rate, eur_usd_rate)
         target_channel_posts = fetch_channel_posts(CHANNEL_ID.replace("@", ""))
         if target_channel_posts and msg in target_channel_posts:
-            log.info("Skipping post: Message is identical to one of the last messages in the target channel.")
+            log.info("Skipping post: Duplicate found.")
             return "skipped_duplicate"
 
         resp = tg_send_message(msg)
@@ -232,13 +229,10 @@ def run_cycle():
 if __name__ == "__main__":
     start_time = time.time()
     end_time = start_time + (MONITOR_DURATION_MINS * 60)
-    
-    print(f"Starting monitor for {MONITOR_DURATION_MINS} minutes...")
     while time.time() < end_time:
         try:
             res = run_cycle()
             print(f"Cycle result: {res}")
         except Exception as e:
             print(f"Error: {e}")
-        
         time.sleep(CHECK_INTERVAL_SECS)
