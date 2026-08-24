@@ -1,5 +1,5 @@
 {
-  "last_post_utc": "2026-08-24T13:41:33.331938+00:00",
+  "last_post_utc": "2026-08-24T14:30:19.407289+00:00",
   "last_keys": {
     "usd_buy": 201900,
     "usd_sell": 203900,
@@ -18,7 +18,7 @@
   "end_of_trading_date": null,
   "last_cycle_utc": "2026-05-05T23:35:38.898842+00:00",
   "last_rates": {
-    "eur_usd": 1.16705,
-    "usd_try": 48.0747
+    "eur_usd": 1.1671,
+    "usd_try": 48.0807
   }
 }
