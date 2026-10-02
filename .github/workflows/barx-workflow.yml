@@ -1,0 +1,20 @@
+name: Barx Bot
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch live rates and post to Telegram
+        run: node barx-github-main.mjs
